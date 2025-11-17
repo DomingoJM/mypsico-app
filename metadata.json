@@ -1,0 +1,7 @@
+{
+  "name": "MYPSICO",
+  "description": "MYPSICO - Tu espacio para sanar. Una aplicación de bienestar que ofrece contenido terapéutico sobre psicología y espiritualidad para apoyar tu camino hacia la sanación y el crecimiento personal.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
