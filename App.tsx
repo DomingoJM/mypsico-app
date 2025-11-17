@@ -1,10 +1,4 @@
 
-
-
-
-
-
-
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { User, Role } from './types';
 import { supabaseService } from './services/supabaseService';
@@ -45,7 +39,7 @@ const SupabaseCredentialsMissingScreen: React.FC = () => {
           </code></pre>
         </div>
         <p className="mt-6 text-sm text-slate-500">
-          Puedes encontrar estas claves en tu panel de Supabase, en la sección de "Project Settings" > "API". Después de guardar los cambios, la aplicación debería funcionar.
+          Puedes encontrar estas claves en tu panel de Supabase, en la sección de "Project Settings" {'>'} "API". Después de guardar los cambios, la aplicación debería funcionar.
         </p>
       </div>
     </div>
