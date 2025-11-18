@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { ContentItem, PromotionalItem } from '../../../types';
 import { supabaseService } from '../../../services/supabaseService';
@@ -10,17 +11,11 @@ import ExternalSurveyScreen from '../../patient/ExternalSurveyScreen';
 import { ChatIcon, WhatsAppIcon, CalendarIcon, SparklesIcon, CloseIcon, BookIcon, ShareIcon, CheckCircleIcon, ChartBarIcon } from '../../shared/Icons';
 import ResourcesView from './ResourcesView';
 
-// ====================================================================================
-// ============================= ¡ACCIÓN REQUERIDA! =================================
-//
-// Reemplaza los siguientes enlaces con tu información de contacto.
-// Esto permitirá a tus pacientes agendar consultas y contactarte fácilmente.
-//
-// 1. WHATSAPP_LINK: Tu enlace directo de WhatsApp (ej. 'https://wa.me/541112345678')
-// 2. CALENDLY_LINK: Tu URL personal de Calendly (ej. 'https://calendly.com/tu-usuario')
-// ====================================================================================
-const WHATSAPP_LINK = 'https://wa.me/573180580919'; // <-- REEMPLAZA CON TU NÚMERO
-const CALENDLY_LINK = 'https://calendly.com/domingo-jaimes'; // <-- REEMPLAZA CON TU LINK
+// The contact links are now sourced from environment variables for better configuration management.
+// They can be set in the deployment platform's settings (e.g., Vercel) with the VITE_ prefix.
+// If a variable is not set, the corresponding button will not be displayed to the user.
+const whatsappLink = process.env.VITE_WHATSAPP_LINK;
+const calendlyLink = process.env.VITE_CALENDLY_LINK;
 
 const spiritualPaths = ['Mindfulness', 'Meditación Cristiana', 'Psicoterapia'];
 
@@ -243,20 +238,26 @@ const PatientDashboard: React.FC = () => {
                     </div>
                     <DailyPlanView content={content} spiritualPath={spiritualPath} />
                     
-                    <div className="mt-8 pt-6 border-t">
-                        <h2 className="text-2xl font-bold font-serif text-brand-dark mb-4">Consultas</h2>
-                        <p className="text-brand-text mb-6">¿Necesitas hablar con un profesional? Agenda una consulta con nosotros.</p>
-                        <div className="flex flex-col sm:flex-row gap-4">
-                            <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" className="flex-1 inline-flex items-center justify-center gap-3 px-6 py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-transform transform hover:scale-105">
-                                <WhatsAppIcon className="w-6 h-6" />
-                                Contactar por WhatsApp
-                            </a>
-                            <a href={CALENDLY_LINK} target="_blank" rel="noopener noreferrer" className="flex-1 inline-flex items-center justify-center gap-3 px-6 py-3 bg-brand-secondary text-brand-dark rounded-lg font-semibold hover:opacity-90 transition-transform transform hover:scale-105">
-                                <CalendarIcon className="w-6 h-6" />
-                                Agendar Consulta
-                            </a>
+                    {(whatsappLink || calendlyLink) && (
+                        <div className="mt-8 pt-6 border-t">
+                            <h2 className="text-2xl font-bold font-serif text-brand-dark mb-4">Consultas</h2>
+                            <p className="text-brand-text mb-6">¿Necesitas hablar con un profesional? Agenda una consulta con nosotros.</p>
+                            <div className="flex flex-col sm:flex-row gap-4">
+                                {whatsappLink && (
+                                    <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="flex-1 inline-flex items-center justify-center gap-3 px-6 py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-transform transform hover:scale-105">
+                                        <WhatsAppIcon className="w-6 h-6" />
+                                        Contactar por WhatsApp
+                                    </a>
+                                )}
+                                {calendlyLink && (
+                                    <a href={calendlyLink} target="_blank" rel="noopener noreferrer" className="flex-1 inline-flex items-center justify-center gap-3 px-6 py-3 bg-brand-secondary text-brand-dark rounded-lg font-semibold hover:opacity-90 transition-transform transform hover:scale-105">
+                                        <CalendarIcon className="w-6 h-6" />
+                                        Agendar Consulta
+                                    </a>
+                                )}
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             );
         case 'tasks':
@@ -282,8 +283,8 @@ const PatientDashboard: React.FC = () => {
       
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             <div className="p-6">
-                <h1 className="text-3xl font-bold font-serif text-brand-dark">Tu Espacio de Bienestar</h1>
-                <p className="text-brand-text mt-1">Aquí encontrarás tus actividades y recursos diarios para tu sanación.</p>
+                <h1 className="text-3xl font-bold font-serif text-brand-dark">¡Bienvenido a tu Espacio de Bienestar!</h1>
+                <p className="text-brand-text mt-1">Aquí encontrarás tu plan diario, tareas y recursos para apoyarte en tu camino.</p>
             </div>
 
             <div className="border-b border-slate-200 px-4 sm:px-6">

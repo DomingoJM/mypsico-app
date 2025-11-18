@@ -1,4 +1,6 @@
 
+// FIX: Remove reference to vite/client as it's causing resolution errors.
+// The code will be modified to use process.env for the Gemini API key as per guidelines.
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { User, Role } from './types';
 import { supabaseService } from './services/supabaseService';
@@ -20,30 +22,64 @@ export const AuthContext = React.createContext<{
   simulateRole: (role: Role) => void;
 } | null>(null);
 
+const ConfigurationErrorScreen: React.FC<{ error: string }> = ({ error }) => {
+    const isSupabaseError = error.includes("Supabase");
+    const isGeminiError = error.includes("Gemini");
 
-const SupabaseCredentialsMissingScreen: React.FC = () => {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-red-50 text-red-900 p-4 font-sans">
-      <div className="max-w-2xl w-full bg-white p-8 rounded-xl shadow-2xl border border-red-200">
-        <h1 className="text-3xl font-bold mb-4 text-center text-red-700">Error de Configuración</h1>
-        <p className="text-lg mb-4 text-slate-700 text-center">
-          La aplicación no puede conectarse a la base de datos.
-        </p>
-        <p className="mb-6 text-slate-600">
-          Parece que las credenciales de Supabase no han sido configuradas. Por favor, abre el archivo <strong>supabase.ts</strong> en tu editor de código y reemplaza los valores de ejemplo con tus claves reales.
-        </p>
-        <div className="bg-slate-800 p-4 rounded-lg shadow-inner text-left text-sm font-mono text-white overflow-x-auto">
-          <pre><code>
-            <span className="text-pink-400">const</span> <span className="text-sky-300">SUPABASE_URL</span> = <span className="text-emerald-300">'YOUR_SUPABASE_URL'</span>;<br />
-            <span className="text-pink-400">const</span> <span className="text-sky-300">SUPABASE_ANON_KEY</span> = <span className="text-emerald-300">'YOUR_SUPABASE_ANON_KEY'</span>;
-          </code></pre>
-        </div>
-        <p className="mt-6 text-sm text-slate-500">
-          Puedes encontrar estas claves en tu panel de Supabase, en la sección de "Project Settings" &gt; "API". Después de guardar los cambios, la aplicación debería funcionar.
-        </p>
+    const requiredKeys = [];
+    if (isSupabaseError) {
+        requiredKeys.push({ name: 'VITE_SUPABASE_URL' });
+        requiredKeys.push({ name: 'VITE_SUPABASE_ANON_KEY' });
+    }
+    if (isGeminiError) {
+        // FIX: Update required key name to VITE_API_KEY to align with user's Vercel setup.
+        requiredKeys.push({ name: 'VITE_API_KEY' });
+    }
+
+    const handleCopy = (text: string) => {
+      navigator.clipboard.writeText(text);
+    };
+
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-red-50 p-4 font-sans">
+          <div className="max-w-3xl w-full bg-white p-8 md:p-12 rounded-2xl shadow-lg border border-red-200">
+              <div className="text-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-16 w-16 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                  </svg>
+                  <h1 className="text-3xl font-bold font-serif text-red-800 mt-4">Error de Configuración</h1>
+                  <p className="text-lg mt-2 text-slate-700">
+                      La aplicación no pudo iniciarse correctamente. Por favor, revisa el siguiente problema:
+                  </p>
+              </div>
+              
+              <div className="mt-8 text-left bg-red-50/50 border-l-4 border-red-400 p-6 rounded-lg">
+                  <h2 className="font-bold text-xl text-red-900">Detalle del Error</h2>
+                  <p className="mt-2 text-red-800 font-mono text-sm bg-red-100 p-3 rounded">{error}</p>
+              </div>
+
+              {requiredKeys.length > 0 && (
+                <div className="mt-6">
+                  <p className="text-slate-700">Para solucionar este problema, debes añadir las siguientes "variables de entorno" a la configuración de tu proyecto en Vercel (o tu plataforma de despliegue) y luego hacer un **Redeploy**.</p>
+                  <div className="mt-4 space-y-4 font-mono text-sm">
+                      {requiredKeys.map(key => (
+                          <div key={key.name} className="flex items-center justify-between bg-slate-50 p-3 rounded-lg border">
+                              <code className="bg-slate-200 text-slate-800 px-2 py-1 rounded">{key.name}</code>
+                              <button onClick={() => handleCopy(key.name)} className="px-3 py-1 bg-slate-200 hover:bg-slate-300 text-slate-600 rounded text-xs font-sans font-semibold">Copiar Nombre</button>
+                          </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+              
+              <div className="mt-8 text-center">
+                  <button onClick={() => window.location.reload()} className="w-full sm:w-auto bg-brand-primary text-white py-3 px-8 rounded-lg font-semibold hover:bg-brand-dark transition-colors text-lg">
+                      Refrescar Página
+                  </button>
+              </div>
+          </div>
       </div>
-    </div>
-  );
+    );
 };
 
 
@@ -54,14 +90,24 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [initError, setInitError] = useState<string | null>(null);
 
-  // Guard clause to prevent app crash if Supabase is not configured.
-  if (!supabase) {
-    return <SupabaseCredentialsMissingScreen />;
-  }
-
   useEffect(() => {
     setLoading(true);
     setInitError(null);
+    
+    // --- Unified Configuration Check ---
+    if (!supabase) {
+      setInitError("Error de Supabase: Las variables 'VITE_SUPABASE_URL' o 'VITE_SUPABASE_ANON_KEY' no están configuradas. Por favor, añádelas a tus variables de entorno.");
+      setLoading(false);
+      return;
+    }
+    // FIX: Use process.env.VITE_API_KEY to match user's Vercel configuration.
+    if (!process.env.VITE_API_KEY) {
+      // FIX: Update error message to refer to VITE_API_KEY.
+      setInitError("Error de Gemini: La variable 'VITE_API_KEY' no está configurada. Por favor, añádela a tus variables de entorno.");
+      setLoading(false);
+      return;
+    }
+
 
     const checkInitialSession = async () => {
       try {
@@ -79,11 +125,18 @@ const App: React.FC = () => {
         setLogoUrl(url);
       } catch (error: unknown) {
         console.error("Error during initial session check:", error);
+        let errorMessage = "Ocurrió un error inesperado al iniciar la aplicación.";
         if (error instanceof Error) {
-            setInitError(error.message);
-        } else {
-            setInitError("Ocurrió un error inesperado al iniciar la aplicación.");
+            errorMessage = error.message;
         }
+
+        if (errorMessage.toLowerCase().includes('failed to fetch') || errorMessage.toLowerCase().includes('network error')) {
+            errorMessage = `Error de Supabase: No se pudo conectar a la URL de tu proyecto. Verifica que 'VITE_SUPABASE_URL' sea correcta y que tu conexión a internet funcione.`;
+        } else if (errorMessage.toLowerCase().includes('invalid authentication credentials')) {
+            errorMessage = "Error de Supabase: Credenciales inválidas. Verifica que la 'VITE_SUPABASE_ANON_KEY' sea correcta.";
+        }
+        
+        setInitError(errorMessage);
         setOriginalUser(null);
         setUser(null);
       } finally {
@@ -156,40 +209,9 @@ const App: React.FC = () => {
     return <LoadingScreen />;
   }
 
-  // If there's an initialization error, show a dedicated screen.
-  // This blocks the rest of the app until the connection issue is resolved (by refreshing).
+  // Use the new unified error screen for ALL initialization errors.
   if (initError) {
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-red-50 text-red-900 p-4 font-sans">
-            <div className="max-w-2xl w-full bg-white p-8 rounded-xl shadow-2xl border border-red-200 text-center">
-                <h1 className="text-3xl font-bold mb-4 text-red-700">Error de Conexión</h1>
-                <p className="text-lg mb-6 text-slate-700">
-                    No se pudo establecer la conexión con la base de datos.
-                </p>
-
-                <div className="bg-brand-light border-l-4 border-brand-primary p-6 rounded-lg text-left mb-6">
-                    <h2 className="font-bold text-xl text-brand-dark">La base de datos puede estar en pausa.</h2>
-                    <p className="mt-2 text-slate-600">
-                        Los proyectos en el plan gratuito de Supabase se pausan después de un período de inactividad. La primera solicitud del día puede tardar más en "despertarla".
-                    </p>
-                    <p className="mt-2 text-slate-600">
-                        Por favor, <strong>refresca la página</strong> para intentarlo de nuevo.
-                    </p>
-                </div>
-
-                <button onClick={() => window.location.reload()} className="w-full bg-brand-primary text-white py-3 rounded-lg font-semibold hover:bg-brand-dark transition-colors text-lg">
-                    Refrescar Página
-                </button>
-
-                <details className="mt-6 text-left text-sm text-slate-500">
-                    <summary className="cursor-pointer font-semibold">Ver detalles técnicos del error</summary>
-                    <div className="mt-2 bg-slate-800 p-3 rounded-lg font-mono text-white text-xs overflow-x-auto">
-                        {initError}
-                    </div>
-                </details>
-            </div>
-        </div>
-    );
+    return <ConfigurationErrorScreen error={initError} />;
   }
 
   const renderContent = () => {

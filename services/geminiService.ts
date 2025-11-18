@@ -1,20 +1,17 @@
 
-
-
 import { GoogleGenAI, Chat } from "@google/genai";
 
-// Assume API_KEY is set in the environment
-const API_KEY = process.env.API_KEY;
-
-if (!API_KEY) {
-  console.warn("API_KEY for Gemini is not set. AI features will be disabled or mocked.");
-}
-
-const ai = API_KEY ? new GoogleGenAI({ apiKey: API_KEY }) : null;
-
 export const geminiService = {
-  startChat: (): Chat | null => {
-    if (!ai) return null;
+  startChat: (): Chat => {
+    // The Google GenAI SDK is initialized here using the `process.env` object,
+    // which is populated by the deployment environment (e.g., Vercel).
+    // App.tsx will guide the user to set the VITE_API_KEY before this function is ever called.
+    const apiKey = process.env.VITE_API_KEY;
+    if (!apiKey) {
+      // This is a safeguard, but the check in App.tsx should prevent this.
+      throw new Error("Gemini API key is not configured.");
+    }
+    const ai = new GoogleGenAI({ apiKey });
     
     // Using a model that supports multimodal input (text and images)
     return ai.chats.create({
