@@ -85,7 +85,7 @@ const AuthScreen: React.FC = () => {
   return (
     <div 
         className="min-h-screen flex flex-col items-center justify-center p-4 bg-cover bg-center"
-        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?q=80&w=2940&auto=format&fit=crop')" }}
+        style={{ backgroundImage: "" }}
     >
       <div className="absolute inset-0 bg-black/30"></div>
       <div className="w-full max-w-md mx-auto z-10">
