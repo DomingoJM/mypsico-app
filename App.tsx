@@ -6,6 +6,7 @@ import { supabaseService } from './services/supabaseService';
 import { supabase } from './supabase';
 import AuthScreen from './components/auth/AuthScreen';
 import Dashboard from './components/dashboard/Dashboard';
+import PublicHome from './components/public/PublicHome'; // ← NUEVO IMPORT
 import type { User as AuthUser, Session } from '@supabase/supabase-js';
 import LoadingScreen from './components/shared/LoadingScreen';
 import ConsentModal from './components/consent/ConsentModal';
@@ -83,13 +84,14 @@ const ConfigurationErrorScreen: React.FC<{ error: string }> = ({ error }) => {
     );
 };
 
-// Componente que maneja el consentimiento (dentro del AuthContext)
+// Componente que maneja el consentimiento y el contenido para usuarios logueados
 const AppContent: React.FC<{ user: User | null }> = ({ user }) => {
   const { showConsent, closeConsent } = useConsent();
 
   const renderContent = () => {
     if (!user) {
-      return <AuthScreen />;
+      // Mostrar página pública a todos (incluyendo no logueados)
+      return <PublicHome />;
     }
     return (
       <>
@@ -129,7 +131,6 @@ const App: React.FC = () => {
       setLoading(false);
       return;
     }
-
 
     const checkInitialSession = async () => {
       try {
