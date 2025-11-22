@@ -9,7 +9,8 @@ import AuthScreen from './components/auth/AuthScreen';
 import Dashboard from './components/dashboard/Dashboard';
 import type { User as AuthUser, Session } from '@supabase/supabase-js';
 import LoadingScreen from './components/shared/LoadingScreen';
-
+import ConsentModal from './components/consent/ConsentModal';
+import { useConsent } from './hooks/useConsent';
 
 export const AuthContext = React.createContext<{
   user: User | null;
@@ -204,7 +205,7 @@ const App: React.FC = () => {
   }, [originalUser]);
 
   const authContextValue = useMemo(() => ({ user, originalUser, login, logout, register, simulateRole, logoUrl, setLogoUrl }), [user, originalUser, login, logout, register, simulateRole, logoUrl]);
-
+const { showConsent, closeConsent } = useConsent();
   if (loading) {
     return <LoadingScreen />;
   }
