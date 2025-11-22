@@ -23,8 +23,8 @@ const PublicHome: React.FC = () => {
     fetchDailyContent();
   }, []);
 
-  const handleEvaluationClick = () => {
-    // Redirigir directamente al formulario de autenticación
+  const handleLoginClick = () => {
+    // Redirigir al formulario de autenticación
     window.location.href = '/auth';
   };
 
@@ -44,7 +44,7 @@ const PublicHome: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-brand-light font-sans text-brand-text">
-      {/* Header con evaluación */}
+      {/* Header con mensaje de login */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
           <div className="text-center">
@@ -55,10 +55,10 @@ const PublicHome: React.FC = () => {
               Tu espacio para el crecimiento personal y bienestar emocional
             </p>
             <button
-              onClick={handleEvaluationClick}
+              onClick={handleLoginClick}
               className="bg-brand-primary hover:bg-brand-dark text-white font-semibold py-3 px-8 rounded-lg text-lg shadow-md transition-colors"
             >
-              📋 Empezar Evaluación
+              👤 ¿Eres terapeuta o paciente? Inicia sesión aquí
             </button>
           </div>
         </div>
