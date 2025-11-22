@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { supabaseService } from '../../services/supabaseService';
 
@@ -22,7 +22,7 @@ const ConsentModal: React.FC<ConsentModalProps> = ({ isOpen, onClose }) => {
       });
 
       // Actualizar el estado local
-      updateUserProfile({ has_completed_survey: true });
+      updateUserProfile({ hasCompletedSurvey: true });
       
       onClose();
     } catch (error) {
