@@ -1,37 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { contentService, DailyContent } from '../../services/contentService';
 import ConsentModal from '../consent/ConsentModal';
-
-interface DailyContent {
-  audio?: string;
-  terapia?: string;
-  meditacion?: string;
-  cancion?: string;
-  libro?: string;
-  curso?: string;
-}
+import LoadingScreen from '../shared/LoadingScreen';
 
 const PublicHome: React.FC = () => {
   const [showConsent, setShowConsent] = useState(false);
-  const [dailyContent] = useState<DailyContent>({
-    audio: 'Meditación guiada de 10 minutos',
-    terapia: 'Ejercicio de terapia cognitiva: Identificar pensamientos automáticos',
-    meditacion: 'Meditación cristiana: Paz interior',
-    cancion: 'Canción del día: "Paz en medio de la tormenta"',
-    libro: 'Libro recomendado: "El poder del ahora"',
-    curso: 'Curso del día: Manejo del estrés'
-  });
+  const [dailyContent, setDailyContent] = useState<DailyContent>({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDailyContent = async () => {
+      try {
+        const content = await contentService.getDailyContent();
+        setDailyContent(content);
+      } catch (error) {
+        console.error('Error fetching daily content:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDailyContent();
+  }, []);
 
   const handleEvaluationClick = () => {
     setShowConsent(true);
   };
 
   const handleConsentAccept = () => {
-    // Cerrar modal y redirigir a registro
     setShowConsent(false);
-    // Por ahora, solo cerramos el modal
-    // Más adelante redirigiremos a la página de registro
-    alert('¡Gracias por aceptar el consentimiento! Pronto podrás crear tu plan terapéutico.');
+    alert('¡Gracias por aceptar el consentimiento! Ahora puedes crear tu plan terapéutico personalizado.');
   };
+
+  const getContentTitle = (content: any) => {
+    if (!content) return 'Contenido no disponible';
+    return content.title || 'Sin título';
+  };
+
+  const getContentDescription = (content: any) => {
+    if (!content) return 'No hay contenido disponible para hoy.';
+    return content.content || 'Sin descripción';
+  };
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="min-h-screen bg-brand-light font-sans text-brand-text">
@@ -69,7 +82,7 @@ const PublicHome: React.FC = () => {
                 <span className="text-2xl mr-3">🎧</span>
                 <h3 className="text-lg font-semibold">Audio del Día</h3>
               </div>
-              <p className="text-gray-700 mb-4">{dailyContent.audio}</p>
+              <p className="text-gray-700 mb-4">{getContentDescription(dailyContent.audio)}</p>
               <div className="flex gap-2">
                 <button className="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-800 py-2 px-4 rounded-lg text-sm font-medium">
                   ▶️ Escuchar
@@ -86,7 +99,7 @@ const PublicHome: React.FC = () => {
                 <span className="text-2xl mr-3">🧠</span>
                 <h3 className="text-lg font-semibold">Terapia del Día</h3>
               </div>
-              <p className="text-gray-700 mb-4">{dailyContent.terapia}</p>
+              <p className="text-gray-700 mb-4">{getContentDescription(dailyContent.terapia)}</p>
               <div className="flex gap-2">
                 <button className="flex-1 bg-green-100 hover:bg-green-200 text-green-800 py-2 px-4 rounded-lg text-sm font-medium">
                   📖 Ver
@@ -103,7 +116,7 @@ const PublicHome: React.FC = () => {
                 <span className="text-2xl mr-3">🧘</span>
                 <h3 className="text-lg font-semibold">Meditación del Día</h3>
               </div>
-              <p className="text-gray-700 mb-4">{dailyContent.meditacion}</p>
+              <p className="text-gray-700 mb-4">{getContentDescription(dailyContent.meditacion)}</p>
               <div className="flex gap-2">
                 <button className="flex-1 bg-purple-100 hover:bg-purple-200 text-purple-800 py-2 px-4 rounded-lg text-sm font-medium">
                   ▶️ Meditar
@@ -114,16 +127,16 @@ const PublicHome: React.FC = () => {
               </div>
             </div>
 
-            {/* Canción del día */}
+            {/* Video de sanación del día */}
             <div className="bg-white rounded-xl p-6 shadow-md border border-gray-100">
               <div className="flex items-center mb-3">
-                <span className="text-2xl mr-3">🎵</span>
-                <h3 className="text-lg font-semibold">Canción del Día</h3>
+                <span className="text-2xl mr-3">✨</span>
+                <h3 className="text-lg font-semibold">Video de Sanación</h3>
               </div>
-              <p className="text-gray-700 mb-4">{dailyContent.cancion}</p>
+              <p className="text-gray-700 mb-4">{getContentDescription(dailyContent.video_sanacion)}</p>
               <div className="flex gap-2">
-                <button className="flex-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 py-2 px-4 rounded-lg text-sm font-medium">
-                  🎶 Escuchar
+                <button className="flex-1 bg-pink-100 hover:bg-pink-200 text-pink-800 py-2 px-4 rounded-lg text-sm font-medium">
+                  ▶️ Ver
                 </button>
                 <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-3 rounded-lg text-sm">
                   ✅
@@ -131,13 +144,13 @@ const PublicHome: React.FC = () => {
               </div>
             </div>
 
-            {/* Libro del día */}
+            {/* Libro del día - contenido estático por ahora */}
             <div className="bg-white rounded-xl p-6 shadow-md border border-gray-100">
               <div className="flex items-center mb-3">
                 <span className="text-2xl mr-3">📚</span>
                 <h3 className="text-lg font-semibold">Libro del Día</h3>
               </div>
-              <p className="text-gray-700 mb-4">{dailyContent.libro}</p>
+              <p className="text-gray-700 mb-4">Explora nuestra selección de libros recomendados para tu crecimiento personal.</p>
               <div className="flex gap-2">
                 <button className="flex-1 bg-orange-100 hover:bg-orange-200 text-orange-800 py-2 px-4 rounded-lg text-sm font-medium">
                   📖 Ver
@@ -148,16 +161,16 @@ const PublicHome: React.FC = () => {
               </div>
             </div>
 
-            {/* Curso del día */}
+            {/* Curso del día - contenido estático por ahora */}
             <div className="bg-white rounded-xl p-6 shadow-md border border-gray-100">
               <div className="flex items-center mb-3">
                 <span className="text-2xl mr-3">🎓</span>
                 <h3 className="text-lg font-semibold">Curso del Día</h3>
               </div>
-              <p className="text-gray-700 mb-4">{dailyContent.curso}</p>
+              <p className="text-gray-700 mb-4">Descubre nuestros cursos especializados para mejorar tu bienestar emocional.</p>
               <div className="flex gap-2">
                 <button className="flex-1 bg-red-100 hover:bg-red-200 text-red-800 py-2 px-4 rounded-lg text-sm font-medium">
-                  🎯 Iniciar
+                  🎯 Explorar
                 </button>
                 <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-3 rounded-lg text-sm">
                   ✅
