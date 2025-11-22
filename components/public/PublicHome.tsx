@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { contentService, DailyContent } from '../../services/contentService';
 import ConsentModal from '../consent/ConsentModal';
-import LoadingScreen from '../../components/shared/LoadingScreen';
+import LoadingScreen from '../components/shared/LoadingScreen';
 
 const PublicHome: React.FC = () => {
   const [showConsent, setShowConsent] = useState(false);
@@ -181,41 +181,17 @@ const PublicHome: React.FC = () => {
         </section>
 
         {/* Botones de contacto */}
-        <section className="text-center mt-12">
+        <section className="text-center">
           <h3 className="text-xl font-semibold mb-4">¿Necesitas apoyo adicional?</h3>
           <div className="flex justify-center gap-4">
-            {/* Botón de Chat - Verde con icono de chat */}
-            <button 
-              onClick={() => window.open('https://your-chat-url.com', '_blank')}
-              className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-semibold flex items-center gap-2 transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5z" />
-                <path d="M8 8a2 2 0 012-2h4a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8z" />
-              </svg>
-              Chat
+            <button className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-semibold flex items-center gap-2">
+              💬 Chat
             </button>
-
-            {/* Botón de WhatsApp - Verde con icono oficial */}
-            <button 
-              onClick={() => window.open('https://wa.me/573180580919', '_blank')}
-              className="bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-semibold flex items-center gap-2 transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l1.42 6.324a1 1 0 01-.986.836l-4.153.52a1 1 0 01-1.169-.836L2 4.153A1 1 0 013 3zm14 0a1 1 0 011 1v2.153a1 1 0 01-.836.986l-6.324 1.42a1 1 0 01-.836-.986L12 5.153A1 1 0 0113 4h2.153a1 1 0 01.836 1.169L16 10.153A1 1 0 0115.164 11l-4.153.52a1 1 0 01-.836-.986l1.42-6.324A1 1 0 0112 3zM2 13a1 1 0 011-1h2.153a1 1 0 01.986.836l1.42 6.324a1 1 0 01-.986.836l-4.153.52a1 1 0 01-1.169-.836L2 14.153A1 1 0 013 13zm14 0a1 1 0 011 1v2.153a1 1 0 01-.836.986l-6.324 1.42a1 1 0 01-.836-.986L12 15.153A1 1 0 0113 14h2.153a1 1 0 01.836 1.169L16 20.153A1 1 0 0115.164 21l-4.153.52a1 1 0 01-.836-.986l1.42-6.324A1 1 0 0112 13z" />
-              </svg>
-              WhatsApp
+            <button className="bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold flex items-center gap-2">
+              📱 WhatsApp
             </button>
-
-            {/* Botón de Calendly - Morado con icono de calendario */}
-            <button 
-              onClick={() => window.open('https://calendly.com/domingo-jaimes', '_blank')}
-              className="bg-purple-500 hover:bg-purple-600 text-white py-3 px-6 rounded-lg font-semibold flex items-center gap-2 transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a1 1 0 00-1 1v1a1 1 0 001 1h1v1a1 1 0 001 1h1a1 1 0 001-1V8H9a1 1 0 001-1V6a1 1 0 00-1-1h-1V3a1 1 0 00-1-1zm2 1a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1V4a1 1 0 00-1-1H8zm4 0a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1V4a1 1 0 00-1-1h-1zm-2 1a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1V6a1 1 0 00-1-1H8zm2 1a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1V8a1 1 0 00-1-1h-1zm-2 1a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1v-1a1 1 0 00-1-1H8zm2 1a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1v-1a1 1 0 00-1-1h-1zm-2 1a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1v-1a1 1 0 00-1-1H8zm2 1a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1v-1a1 1 0 00-1-1h-1zm-2 1a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1v-1a1 1 0 00-1-1H8zm2 1a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1v-1a1 1 0 00-1-1h-1z" clipRule="evenodd" />
-              </svg>
-              Agendar Cita
+            <button className="bg-purple-500 hover:bg-purple-600 text-white py-3 px-6 rounded-lg font-semibold flex items-center gap-2">
+              📅 Agendar Cita
             </button>
           </div>
         </section>
