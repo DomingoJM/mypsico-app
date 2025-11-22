@@ -1,4 +1,3 @@
-
 // FIX: Remove reference to vite/client as it's causing resolution errors.
 // The code will be modified to use process.env for the Gemini API key as per guidelines.
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
@@ -15,6 +14,7 @@ import { useConsent } from './hooks/useConsent';
 export const AuthContext = React.createContext<{
   user: User | null;
   originalUser: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
   logoUrl: string | null;
   setLogoUrl: (url: string | null) => void;
   login: (email: string, password: string) => Promise<void>;
@@ -204,8 +204,10 @@ const App: React.FC = () => {
       }
   }, [originalUser]);
 
-  const authContextValue = useMemo(() => ({ user, originalUser, login, logout, register, simulateRole, logoUrl, setLogoUrl }), [user, originalUser, login, logout, register, simulateRole, logoUrl]);
-const { showConsent, closeConsent } = useConsent();
+  const authContextValue = useMemo(() => ({ user, originalUser, setUser, login, logout, register, simulateRole, logoUrl, setLogoUrl }), [user, originalUser, setUser, login, logout, register, simulateRole, logoUrl]);
+  
+  const { showConsent, closeConsent } = useConsent();
+
   if (loading) {
     return <LoadingScreen />;
   }
@@ -219,7 +221,15 @@ const { showConsent, closeConsent } = useConsent();
     if (!user) {
       return <AuthScreen />;
     }
-    return <Dashboard />;
+    return (
+      <>
+        <Dashboard />
+        <ConsentModal 
+          isOpen={showConsent} 
+          onClose={closeConsent} 
+        />
+      </>
+    );
   };
 
   return (
