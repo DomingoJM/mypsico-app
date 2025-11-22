@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { contentService, DailyContent } from '../../services/contentService';
 import ConsentModal from '../consent/ConsentModal';
-import LoadingScreen from '../../components/shared/LoadingScreen'; // ← RUTA CORREGIDA
+import LoadingScreen from '../../components/shared/LoadingScreen';
 
 const PublicHome: React.FC = () => {
   const [showConsent, setShowConsent] = useState(false);
