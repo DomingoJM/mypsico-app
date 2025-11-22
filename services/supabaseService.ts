@@ -51,7 +51,7 @@ type UserFormData = Partial<User> & { password?: string, photoFile?: File };
 const API_TIMEOUT = 120000; // 120 segundos (2 minutos)
 
 // FIX: Changed `promise` parameter type from `Promise<T>` to `PromiseLike<T>` to correctly handle Supabase's "thenable" query builders.
-const withTimeout = <T>(promise: PromiseLike<T>, ms: number): Promise<T> => {
+export const withTimeout = <T>(promise: PromiseLike<T>, ms: number): Promise<T> => {
     return new Promise((resolve, reject) => {
         const timeoutId = setTimeout(() => {
             reject(new Error(`La operación tardó demasiado en responder (más de ${ms / 1000} segundos). Esto puede deberse a un problema de conexión o a que la base de datos del proyecto no está activa.`));
