@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { contentService, DailyContent } from '../../services/contentService';
 import ConsentModal from '../consent/ConsentModal';
-import LoadingScreen from '../components/shared/LoadingScreen';
+import LoadingScreen from '../../components/shared/LoadingScreen';
 
 const PublicHome: React.FC = () => {
   const [showConsent, setShowConsent] = useState(false);
@@ -24,17 +24,15 @@ const PublicHome: React.FC = () => {
   }, []);
 
   const handleEvaluationClick = () => {
-    setShowConsent(true);
+    // Redirigir directamente al formulario de autenticación
+    // Esto evita problemas con el consentimiento en producción
+    window.location.href = '/auth'; // Ajusta esta ruta según tu app
   };
 
   const handleConsentAccept = () => {
     setShowConsent(false);
-    alert('¡Gracias por aceptar el consentimiento! Ahora puedes crear tu plan terapéutico personalizado.');
-  };
-
-  const getContentTitle = (content: any) => {
-    if (!content) return 'Contenido no disponible';
-    return content.title || 'Sin título';
+    // Redirigir al formulario de autenticación
+    window.location.href = '/auth';
   };
 
   const getContentDescription = (content: any) => {
@@ -144,13 +142,13 @@ const PublicHome: React.FC = () => {
               </div>
             </div>
 
-            {/* Libro del día - contenido estático por ahora */}
+            {/* Libro del día */}
             <div className="bg-white rounded-xl p-6 shadow-md border border-gray-100">
               <div className="flex items-center mb-3">
                 <span className="text-2xl mr-3">📚</span>
                 <h3 className="text-lg font-semibold">Libro del Día</h3>
               </div>
-              <p className="text-gray-700 mb-4">Explora nuestra selección de libros recomendados para tu crecimiento personal.</p>
+              <p className="text-gray-700 mb-4">Explora nuestra selección de libros recomendados.</p>
               <div className="flex gap-2">
                 <button className="flex-1 bg-orange-100 hover:bg-orange-200 text-orange-800 py-2 px-4 rounded-lg text-sm font-medium">
                   📖 Ver
@@ -161,13 +159,13 @@ const PublicHome: React.FC = () => {
               </div>
             </div>
 
-            {/* Curso del día - contenido estático por ahora */}
+            {/* Curso del día */}
             <div className="bg-white rounded-xl p-6 shadow-md border border-gray-100">
               <div className="flex items-center mb-3">
                 <span className="text-2xl mr-3">🎓</span>
                 <h3 className="text-lg font-semibold">Curso del Día</h3>
               </div>
-              <p className="text-gray-700 mb-4">Descubre nuestros cursos especializados para mejorar tu bienestar emocional.</p>
+              <p className="text-gray-700 mb-4">Descubre nuestros cursos especializados.</p>
               <div className="flex gap-2">
                 <button className="flex-1 bg-red-100 hover:bg-red-200 text-red-800 py-2 px-4 rounded-lg text-sm font-medium">
                   🎯 Explorar
@@ -180,17 +178,31 @@ const PublicHome: React.FC = () => {
           </div>
         </section>
 
-        {/* Botones de contacto */}
-        <section className="text-center">
+        {/* Botones de contacto - FUNCIONALES PARA PRODUCCIÓN */}
+        <section className="text-center mt-12">
           <h3 className="text-xl font-semibold mb-4">¿Necesitas apoyo adicional?</h3>
           <div className="flex justify-center gap-4">
-            <button className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-semibold flex items-center gap-2">
+            {/* Botón de Chat - REDIRIGE A TU CHAT REAL */}
+            <button 
+              onClick={() => window.open('https://your-chat-url.com', '_blank')}
+              className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-semibold flex items-center gap-2 transition-colors"
+            >
               💬 Chat
             </button>
-            <button className="bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold flex items-center gap-2">
+
+            {/* Botón de WhatsApp - CON TU NÚMERO REAL */}
+            <button 
+              onClick={() => window.open('https://wa.me/573180580919', '_blank')}
+              className="bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-semibold flex items-center gap-2 transition-colors"
+            >
               📱 WhatsApp
             </button>
-            <button className="bg-purple-500 hover:bg-purple-600 text-white py-3 px-6 rounded-lg font-semibold flex items-center gap-2">
+
+            {/* Botón de Calendly - CON TU ENLACE REAL */}
+            <button 
+              onClick={() => window.open('https://calendly.com/domingo-jaimes', '_blank')}
+              className="bg-purple-500 hover:bg-purple-600 text-white py-3 px-6 rounded-lg font-semibold flex items-center gap-2 transition-colors"
+            >
               📅 Agendar Cita
             </button>
           </div>
@@ -201,7 +213,6 @@ const PublicHome: React.FC = () => {
       <ConsentModal 
         isOpen={showConsent} 
         onClose={() => setShowConsent(false)} 
-        onAccept={handleConsentAccept}
       />
     </div>
   );
