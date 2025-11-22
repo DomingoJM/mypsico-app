@@ -25,13 +25,11 @@ const PublicHome: React.FC = () => {
 
   const handleEvaluationClick = () => {
     // Redirigir directamente al formulario de autenticación
-    // Esto evita problemas con el consentimiento en producción
-    window.location.href = '/auth'; // Ajusta esta ruta según tu app
+    window.location.href = '/auth';
   };
 
   const handleConsentAccept = () => {
     setShowConsent(false);
-    // Redirigir al formulario de autenticación
     window.location.href = '/auth';
   };
 
@@ -182,7 +180,7 @@ const PublicHome: React.FC = () => {
         <section className="text-center mt-12">
           <h3 className="text-xl font-semibold mb-4">¿Necesitas apoyo adicional?</h3>
           <div className="flex justify-center gap-4">
-            {/* Botón de Chat - REDIRIGE A TU CHAT REAL */}
+            {/* Botón de Chat - ACTUALIZADO */}
             <button 
               onClick={() => window.open('https://your-chat-url.com', '_blank')}
               className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-semibold flex items-center gap-2 transition-colors"
@@ -190,15 +188,15 @@ const PublicHome: React.FC = () => {
               💬 Chat
             </button>
 
-            {/* Botón de WhatsApp - CON TU NÚMERO REAL */}
+            {/* Botón de WhatsApp - ACTUALIZADO */}
             <button 
               onClick={() => window.open('https://wa.me/573180580919', '_blank')}
-              className="bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-semibold flex items-center gap-2 transition-colors"
+              className="bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold flex items-center gap-2 transition-colors"
             >
               📱 WhatsApp
             </button>
 
-            {/* Botón de Calendly - CON TU ENLACE REAL */}
+            {/* Botón de Calendly - ACTUALIZADO */}
             <button 
               onClick={() => window.open('https://calendly.com/domingo-jaimes', '_blank')}
               className="bg-purple-500 hover:bg-purple-600 text-white py-3 px-6 rounded-lg font-semibold flex items-center gap-2 transition-colors"
@@ -213,6 +211,7 @@ const PublicHome: React.FC = () => {
       <ConsentModal 
         isOpen={showConsent} 
         onClose={() => setShowConsent(false)} 
+        onAccept={handleConsentAccept}
       />
     </div>
   );
