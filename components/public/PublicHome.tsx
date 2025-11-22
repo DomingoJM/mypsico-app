@@ -213,4 +213,22 @@ const PublicHome: React.FC = () => {
               className="bg-purple-500 hover:bg-purple-600 text-white py-3 px-6 rounded-lg font-semibold flex items-center gap-2 transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a1 1 0 00-1 1v1a1 1 0 001 1h1v1a1 1 0 001 1h1a1 1 0 001-1V8H9a1 1 0 001-1V6a1 1 0 00-1-1h-1V3a1 1 0 00-1-1zm2 1a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1V4a1 1 0 00-1-1H8zm4 0a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1V4a1 1 0 00-1-1h-1zm-2 1a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1V6a1 1 0 00-1-1H8zm2 1a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1V8a1 1 0 00-1-1h-1zm-2 1a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1v-1a1 1 0 00-1-1H8zm2 1a1 1 0 00-1 1v1a1 1 0 001
+                <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a1 1 0 00-1 1v1a1 1 0 001 1h1v1a1 1 0 001 1h1a1 1 0 001-1V8H9a1 1 0 001-1V6a1 1 0 00-1-1h-1V3a1 1 0 00-1-1zm2 1a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1V4a1 1 0 00-1-1H8zm4 0a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1V4a1 1 0 00-1-1h-1zm-2 1a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1V6a1 1 0 00-1-1H8zm2 1a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1V8a1 1 0 00-1-1h-1zm-2 1a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1v-1a1 1 0 00-1-1H8zm2 1a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1v-1a1 1 0 00-1-1h-1zm-2 1a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1v-1a1 1 0 00-1-1H8zm2 1a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1v-1a1 1 0 00-1-1h-1zm-2 1a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1v-1a1 1 0 00-1-1H8zm2 1a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1v-1a1 1 0 00-1-1h-1z" clipRule="evenodd" />
+              </svg>
+              Agendar Cita
+            </button>
+          </div>
+        </section>
+      </main>
+
+      {/* Modal de consentimiento */}
+      <ConsentModal 
+        isOpen={showConsent} 
+        onClose={() => setShowConsent(false)} 
+        onAccept={handleConsentAccept}
+      />
+    </div>
+  );
+};
+
+export default PublicHome;
