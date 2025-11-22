@@ -83,6 +83,27 @@ const ConfigurationErrorScreen: React.FC<{ error: string }> = ({ error }) => {
     );
 };
 
+// Componente que maneja el consentimiento (dentro del AuthContext)
+const AppContent: React.FC<{ user: User | null }> = ({ user }) => {
+  const { showConsent, closeConsent } = useConsent();
+
+  const renderContent = () => {
+    if (!user) {
+      return <AuthScreen />;
+    }
+    return (
+      <>
+        <Dashboard />
+        <ConsentModal 
+          isOpen={showConsent} 
+          onClose={closeConsent} 
+        />
+      </>
+    );
+  };
+
+  return renderContent();
+};
 
 const App: React.FC = () => {
   const [originalUser, setOriginalUser] = useState<User | null>(null);
@@ -205,8 +226,6 @@ const App: React.FC = () => {
   }, [originalUser]);
 
   const authContextValue = useMemo(() => ({ user, originalUser, setUser, login, logout, register, simulateRole, logoUrl, setLogoUrl }), [user, originalUser, setUser, login, logout, register, simulateRole, logoUrl]);
-  
-  const { showConsent, closeConsent } = useConsent();
 
   if (loading) {
     return <LoadingScreen />;
@@ -217,25 +236,10 @@ const App: React.FC = () => {
     return <ConfigurationErrorScreen error={initError} />;
   }
 
-  const renderContent = () => {
-    if (!user) {
-      return <AuthScreen />;
-    }
-    return (
-      <>
-        <Dashboard />
-        <ConsentModal 
-          isOpen={showConsent} 
-          onClose={closeConsent} 
-        />
-      </>
-    );
-  };
-
   return (
     <AuthContext.Provider value={authContextValue}>
       <div className="min-h-screen bg-brand-light font-sans text-brand-text">
-        {renderContent()}
+        <AppContent user={user} />
       </div>
     </AuthContext.Provider>
   );
