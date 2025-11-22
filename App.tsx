@@ -89,6 +89,11 @@ const AppContent: React.FC<{ user: User | null }> = ({ user }) => {
   const { showConsent, closeConsent } = useConsent();
 
   const renderContent = () => {
+    // Verificar si estamos en la ruta de autenticación
+    if (window.location.pathname === '/auth') {
+      return <AuthScreen />;
+    }
+    
     if (!user) {
       // Mostrar página pública a todos (incluyendo no logueados)
       return <PublicHome />;
