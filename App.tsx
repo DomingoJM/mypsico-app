@@ -6,7 +6,7 @@ import { supabaseService } from './services/supabaseService';
 import { supabase } from './supabase';
 import AuthScreen from './components/auth/AuthScreen';
 import Dashboard from './components/dashboard/Dashboard';
-import PublicHome from './components/public/PublicHome'; // ← NUEVO IMPORT
+import PublicHome from './components/public/PublicHome';
 import type { User as AuthUser, Session } from '@supabase/supabase-js';
 import LoadingScreen from './components/shared/LoadingScreen';
 import ConsentModal from './components/consent/ConsentModal';
@@ -34,7 +34,6 @@ const ConfigurationErrorScreen: React.FC<{ error: string }> = ({ error }) => {
         requiredKeys.push({ name: 'VITE_SUPABASE_ANON_KEY' });
     }
     if (isGeminiError) {
-        // FIX: Update required key name to VITE_API_KEY to align with user's Vercel setup.
         requiredKeys.push({ name: 'VITE_API_KEY' });
     }
 
@@ -129,9 +128,7 @@ const App: React.FC = () => {
       setLoading(false);
       return;
     }
-    // FIX: Use process.env.VITE_API_KEY to match user's Vercel configuration.
     if (!process.env.VITE_API_KEY) {
-      // FIX: Update error message to refer to VITE_API_KEY.
       setInitError("Error de Gemini: La variable 'VITE_API_KEY' no está configurada. Por favor, añádela a tus variables de entorno.");
       setLoading(false);
       return;
@@ -139,7 +136,7 @@ const App: React.FC = () => {
 
     const checkInitialSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const {  { session } } = await supabase.auth.getSession();
         if (session?.user) {
           const userProfile = await supabaseService.getUserProfile(session.user);
           setOriginalUser(userProfile);
@@ -176,10 +173,10 @@ const App: React.FC = () => {
     checkInitialSession();
 
     // Then, set up the listener for any subsequent changes in auth state.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const {  { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       // The listener updates the user state in real-time.
       if (session?.user) {
-        setInitError(null); // Clear error on successful auth change
+        setInitError(null);
         const userProfile = await supabaseService.getUserProfile(session.user);
         setOriginalUser(userProfile);
         setUser(userProfile);
@@ -197,12 +194,10 @@ const App: React.FC = () => {
   const login = useCallback(async (email: string, password: string) => {
     const { user: authUser } = await supabaseService.login(email, password);
     if (authUser) {
-      // The onAuthStateChange listener will also handle this, but setting it here
-      // provides a faster UI response.
       const userProfile = await supabaseService.getUserProfile(authUser);
       setOriginalUser(userProfile);
       setUser(userProfile);
-      setInitError(null); // Clear previous errors on successful login
+      setInitError(null);
     }
   }, []);
 
@@ -211,7 +206,6 @@ const App: React.FC = () => {
     if (error) {
         console.error("Error logging out:", error);
     }
-    // The onAuthStateChange listener will automatically handle clearing user state.
   }, []);
 
   const register = useCallback(async (name: string, email: string, password: string) => {
@@ -222,22 +216,22 @@ const App: React.FC = () => {
   const simulateRole = useCallback((newRole: Role) => {
       if (!originalUser) return;
 
-      // If the selected role is the user's actual role, restore the original user object.
       if (newRole === originalUser.role) {
           setUser(originalUser);
       } else {
-          // Otherwise, create a new simulated user object based on the original one.
           setUser({ ...originalUser, role: newRole });
       }
   }, [originalUser]);
 
   const authContextValue = useMemo(() => ({ user, originalUser, setUser, login, logout, register, simulateRole, logoUrl, setLogoUrl }), [user, originalUser, setUser, login, logout, register, simulateRole, logoUrl]);
 
+  // Añadido para depuración
+  console.log('AuthContext Value:', authContextValue);
+
   if (loading) {
     return <LoadingScreen />;
   }
 
-  // Use the new unified error screen for ALL initialization errors.
   if (initError) {
     return <ConfigurationErrorScreen error={initError} />;
   }
