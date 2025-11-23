@@ -11,6 +11,9 @@ const PublicHome: React.FC = () => {
   useEffect(() => {
     const fetchDailyContent = async () => {
       try {
+        setLoading(true);
+        // Añadir un pequeño retraso para mejorar la percepción de carga
+        await new Promise(resolve => setTimeout(resolve, 200));
         const content = await contentService.getDailyContent();
         setDailyContent(content);
       } catch (error) {
@@ -180,7 +183,7 @@ const PublicHome: React.FC = () => {
         <section className="text-center mt-12">
           <h3 className="text-xl font-semibold mb-4">¿Necesitas apoyo adicional?</h3>
           <div className="flex justify-center gap-4">
-            {/* Botón de Chat - ACTUALIZADO */}
+            {/* Botón de Chat */}
             <button 
               onClick={() => window.open('https://your-chat-url.com', '_blank')}
               className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-semibold flex items-center gap-2 transition-colors"
@@ -188,7 +191,7 @@ const PublicHome: React.FC = () => {
               💬 Chat
             </button>
 
-            {/* Botón de WhatsApp - ACTUALIZADO */}
+            {/* Botón de WhatsApp */}
             <button 
               onClick={() => window.open('https://wa.me/573180580919', '_blank')}
               className="bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold flex items-center gap-2 transition-colors"
@@ -196,7 +199,7 @@ const PublicHome: React.FC = () => {
               📱 WhatsApp
             </button>
 
-            {/* Botón de Calendly - ACTUALIZADO */}
+            {/* Botón de Calendly */}
             <button 
               onClick={() => window.open('https://calendly.com/domingo-jaimes', '_blank')}
               className="bg-purple-500 hover:bg-purple-600 text-white py-3 px-6 rounded-lg font-semibold flex items-center gap-2 transition-colors"
