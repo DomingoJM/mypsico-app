@@ -22,21 +22,28 @@ const AuthScreen: React.FC = () => {
     }
   }, []);
 
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
+    
+    // Verificar que el contexto de autenticación esté disponible
+    if (!auth) {
+      setError('Error: Servicio de autenticación no disponible');
+      setLoading(false);
+      return;
+    }
+    
     try {
       if (isLogin) {
-        await auth?.login(email, password);
+        await auth.login(email, password);
         if (rememberMe) {
             localStorage.setItem('rememberedEmail', email);
         } else {
             localStorage.removeItem('rememberedEmail');
         }
       } else {
-        const data = await auth?.register(name, email, password);
+        const data = await auth.register(name, email, password);
         // Si no hay una sesión después del registro, significa que se requiere confirmación por correo.
         if (!data?.session) {
           setRegistrationSuccess(true);
@@ -90,7 +97,7 @@ const AuthScreen: React.FC = () => {
       <div className="absolute inset-0 bg-black/30"></div>
       <div className="w-full max-w-md mx-auto z-10">
         <div className="text-center mb-8">
-          <h1 className="text-5xl font-serif text-white tracking-wider drop-shadow-lg">MYPSICO</h1>
+          <h1 className="text-5xl font-serif text-white tracking-wider drop-shadow-lg">MyPsico</h1>
           <p className="text-white/90 mt-2 text-lg drop-shadow-md">Tu espacio para sanar.</p>
         </div>
         <div className="bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-2xl transition-all duration-500">
