@@ -84,29 +84,6 @@ const ConfigurationErrorScreen: React.FC<{ error: string }> = ({ error }) => {
     );
 };
 
-// Componente que maneja el consentimiento y el contenido para usuarios logueados
-const AppContent: React.FC<{ user: User | null }> = ({ user }) => {
-  const { showConsent, closeConsent } = useConsent();
-
-  const renderContent = () => {
-    if (!user) {
-      // Mostrar página pública a todos (incluyendo no logueados)
-      return <PublicHome />;
-    }
-    return (
-      <>
-        <Dashboard />
-        <ConsentModal 
-          isOpen={showConsent} 
-          onClose={closeConsent} 
-        />
-      </>
-    );
-  };
-
-  return renderContent();
-};
-
 const App: React.FC = () => {
   const [originalUser, setOriginalUser] = useState<User | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -162,7 +139,6 @@ const App: React.FC = () => {
         setOriginalUser(null);
         setUser(null);
       } finally {
-        // Ensure the loading screen is always removed after the initial check.
         setLoading(false);
       }
     };
@@ -170,7 +146,7 @@ const App: React.FC = () => {
     checkInitialSession();
 
     // Then, set up the listener for any subsequent changes in auth state.
-    const {  { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       // The listener updates the user state in real-time.
       if (session?.user) {
         setInitError(null);
@@ -242,7 +218,22 @@ const App: React.FC = () => {
           {/* Ruta protegida - Dashboard según rol */}
           <Route 
             path="/dashboard/*" 
-            element={user ? <AppContent user={user} /> : <Navigate to="/auth" replace />} 
+            element={user ? (
+              <>
+                <Dashboard />
+                <ConsentModal 
+                  isOpen={user && !user.hasCompletedSurvey && user.role === 'paciente'}
+                  onClose={() => {}}
+                  onAccept={async () => {
+                    await supabaseService.updateUserProfile(user.id, { has_completed_survey: true });
+                    // Actualizar estado local
+                    setUser({ ...user, hasCompletedSurvey: true });
+                  }}
+                />
+              </>
+            ) : (
+              <Navigate to="/auth" replace />
+            )} 
           />
           
           {/* Redirección por defecto */}
