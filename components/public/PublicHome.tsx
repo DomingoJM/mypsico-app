@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { contentService, DailyContent } from '../../services/contentService';
 import ConsentModal from '../consent/ConsentModal';
 import LoadingScreen from '../../components/shared/LoadingScreen';
 
 const PublicHome: React.FC = () => {
+  const navigate = useNavigate();
   const [showConsent, setShowConsent] = useState(false);
   const [dailyContent, setDailyContent] = useState<DailyContent>({});
   const [loading, setLoading] = useState(true);
@@ -27,13 +29,13 @@ const PublicHome: React.FC = () => {
   }, []);
 
   const handleLoginClick = () => {
-    // Redirigir al formulario de autenticación
-    window.location.href = '/auth';
+    // Usar React Router en lugar de window.location.href
+    navigate('/auth');
   };
 
   const handleConsentAccept = () => {
     setShowConsent(false);
-    window.location.href = '/auth';
+    navigate('/auth');
   };
 
   const getContentDescription = (content: any) => {

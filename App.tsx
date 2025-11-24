@@ -101,7 +101,7 @@ const App: React.FC = () => {
       setLoading(false);
       return;
     }
-    if (!process.env.VITE_API_KEY) {
+    if (!import.meta.env.VITE_API_KEY) {
       setInitError("Error de Gemini: La variable 'VITE_API_KEY' no está configurada. Por favor, añádela a tus variables de entorno.");
       setLoading(false);
       return;
