@@ -100,12 +100,7 @@ const App: React.FC = () => {
       setInitError("Error de Supabase: Las variables 'VITE_SUPABASE_URL' o 'VITE_SUPABASE_ANON_KEY' no están configuradas. Por favor, añádelas a tus variables de entorno.");
       setLoading(false);
       return;
-    }
-    if (!import.meta.env.VITE_API_KEY) {
-      setInitError("Error de Gemini: La variable 'VITE_API_KEY' no está configurada. Por favor, añádela a tus variables de entorno.");
-      setLoading(false);
-      return;
-    }
+        }
 
     const checkInitialSession = async () => {
       try {
