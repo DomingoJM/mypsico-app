@@ -1,27 +1,14 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
+// src/supabase.ts
+import { createClient } from '@supabase/supabase-js';
 
-// ====================================================================================
-// ============================= ACCIÓN REQUERIDA ====================================
-//
-// Para que la aplicación funcione, debes configurar las siguientes variables de
-// entorno en tu plataforma de despliegue (ej. Vercel, Netlify):
-//
-// 1. VITE_SUPABASE_URL: La URL de tu proyecto de Supabase.
-// 2. VITE_SUPABASE_ANON_KEY: La clave anónima (pública) de tu proyecto.
-// 3. VITE_API_KEY: Tu clave de API para el servicio de Gemini.
-//
-// Hardcodear claves es inseguro y causa problemas en el despliegue.
-// ====================================================================================
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY;
+// Usar import.meta.env para Vite (variables de entorno en el lado del cliente)
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+// Verificar que las variables estén definidas
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing Supabase environment variables: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be set.');
+}
 
-// --- No modifiques el código debajo de esta línea ---
-
-// Se crea el cliente de Supabase solo si las variables de entorno están presentes.
-// App.tsx mostrará una pantalla de error amigable si no están configuradas.
-const supabase: SupabaseClient | null = (SUPABASE_URL && SUPABASE_ANON_KEY)
-  ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-  : null;
-
-export { supabase };
+// Crear y exportar la instancia de Supabase
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
