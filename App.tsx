@@ -1,6 +1,7 @@
 // FIX: Remove reference to vite/client as it's causing resolution errors.
 // The code will be modified to use process.env for the Gemini API key as per guidelines.
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { User, Role } from './types';
 import { supabaseService } from './services/supabaseService';
 import { supabase } from './supabase';
@@ -88,11 +89,6 @@ const AppContent: React.FC<{ user: User | null }> = ({ user }) => {
   const { showConsent, closeConsent } = useConsent();
 
   const renderContent = () => {
-    // Verificar si estamos en la ruta de autenticación
-    if (window.location.pathname === '/auth') {
-      return <AuthScreen />;
-    }
-    
     if (!user) {
       // Mostrar página pública a todos (incluyendo no logueados)
       return <PublicHome />;
@@ -136,7 +132,8 @@ const App: React.FC = () => {
 
     const checkInitialSession = async () => {
       try {
-        const {  { session } } = await supabase.auth.getSession();
+        // CORRECCIÓN: Sintaxis correcta de desestructuración
+        const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           const userProfile = await supabaseService.getUserProfile(session.user);
           setOriginalUser(userProfile);
@@ -225,9 +222,6 @@ const App: React.FC = () => {
 
   const authContextValue = useMemo(() => ({ user, originalUser, setUser, login, logout, register, simulateRole, logoUrl, setLogoUrl }), [user, originalUser, setUser, login, logout, register, simulateRole, logoUrl]);
 
-  // Añadido para depuración
-  console.log('AuthContext Value:', authContextValue);
-
   if (loading) {
     return <LoadingScreen />;
   }
@@ -236,11 +230,25 @@ const App: React.FC = () => {
     return <ConfigurationErrorScreen error={initError} />;
   }
 
+  // CON REACT ROUTER - Sistema de rutas moderno
   return (
     <AuthContext.Provider value={authContextValue}>
-      <div className="min-h-screen bg-brand-light font-sans text-brand-text">
-        <AppContent user={user} />
-      </div>
+      <Router>
+        <Routes>
+          {/* Rutas públicas */}
+          <Route path="/" element={<PublicHome />} />
+          <Route path="/auth" element={<AuthScreen />} />
+          
+          {/* Ruta protegida - Dashboard según rol */}
+          <Route 
+            path="/dashboard/*" 
+            element={user ? <AppContent user={user} /> : <Navigate to="/auth" replace />} 
+          />
+          
+          {/* Redirección por defecto */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
     </AuthContext.Provider>
   );
 };
