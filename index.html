@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
+  <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MYPSICO</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
@@ -14,12 +14,12 @@
             theme: {
                 extend: {
                     colors: {
-                        'brand-primary': '#6B7A8F',      // Slate Blue (Calm, Professional)
-                        'brand-secondary': '#F7C59F',    // Soft Peach (Warm, Inviting)
-                        'brand-light': '#FDFBF7',      // Warm Off-White (Clean, Soft)
-                        'brand-dark': '#414A5A',        // Dark Slate (Readable Text)
-                        'brand-accent': '#D8A7B1',      // Dusty Rose (Gentle, Caring)
-                        'brand-text': '#414A5A',         // Main text color
+                        'brand-primary': '#6B7A8F',
+                        'brand-secondary': '#F7C59F',
+                        'brand-light': '#FDFBF7',
+                        'brand-dark': '#414A5A',
+                        'brand-accent': '#D8A7B1',
+                        'brand-text': '#414A5A',
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
@@ -30,103 +30,17 @@
         }
     </script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-
-        .custom-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 24px;
-            height: 24px;
-            background: #6B7A8F; /* brand-primary */
-            cursor: pointer;
-            border-radius: 50%;
-            border: 4px solid #FDFBF7; /* brand-light */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            margin-top: -9px; /* Adjust vertical center */
-            transition: transform 0.2s ease-in-out;
-        }
-
-        .custom-slider:active::-webkit-slider-thumb {
-            transform: scale(1.2);
-        }
+        body { font-family: 'Inter', sans-serif; }
         
-        .custom-slider::-moz-range-thumb {
-            width: 24px;
-            height: 24px;
-            background: #6B7A8F; /* brand-primary */
-            cursor: pointer;
-            border-radius: 50%;
-            border: 4px solid #FDFBF7; /* brand-light */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            transition: transform 0.2s ease-in-out;
-        }
-        
-        .custom-slider:active::-moz-range-thumb {
-            transform: scale(1.2);
-        }
-
-        .custom-slider::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 6px;
-            cursor: pointer;
-            background: #e2e8f0; /* slate-200 */
-            border-radius: 9999px;
-        }
-
-        .custom-slider::-moz-range-track {
-            width: 100%;
-            height: 6px;
-            cursor: pointer;
-            background: #e2e8f0; /* slate-200 */
-            border-radius: 9999px;
-        }
-
         @keyframes fade-in-up {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .animate-fade-in-up {
-            animation: fade-in-up 0.6s ease-out forwards;
-        }
-
-        @keyframes gradient-animation {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        .animated-gradient {
-            background: linear-gradient(-45deg, #6B7A8F, #F7C59F, #D8A7B1, #FDFBF7);
-            background-size: 400% 400%;
-            animation: gradient-animation 15s ease infinite;
-        }
+        .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.29.1",
-    "@supabase/supabase-js": "https://aistudiocdn.com/@supabase/supabase-js@^2.44.4",
-    "firebase/": "https://aistudiocdn.com/firebase@^12.6.0/",
-    "recharts": "https://aistudiocdn.com/recharts@^2.12.7",
-    "vite": "https://aistudiocdn.com/vite@^7.2.2",
-    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1"
-  }
-}
-</script>
-</head>
-<body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+  </head>
+  <body>
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
-</body>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
