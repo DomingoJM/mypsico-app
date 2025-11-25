@@ -70,7 +70,6 @@ export const withTimeout = <T>(promise: PromiseLike<T>, ms: number): Promise<T> 
     });
 };
 
-
 export const supabaseService = {
   login: async (email: string, password: string): Promise<{ session: Session | null; user: AuthUser | null; }> => {
     if (!supabase) throw new Error("Supabase client not initialized.");
@@ -146,18 +145,13 @@ export const supabaseService = {
           treatment_plan: userData.treatment_plan,
           follow_up_and_control: userData.follow_up_and_control,
           therapistId: therapistId,
+          // Siempre crear como paciente por defecto
+          role: Role.Patient,
       };
-      
-      // If a role is provided (by an admin), include it in the update.
-      // The DB trigger will first assign 'paciente', this will override it.
-      if (userData.role) {
-          profileUpdates.role = userData.role;
-      }
       
       const { data: profileData, error: profileError } = await withTimeout<PostgrestSingleResponse<User>>(supabase
           .from('profiles')
-          .update(profileUpdates)
-          .eq('id', userId)
+          .insert(profileUpdates)
           .select()
           .single(), API_TIMEOUT);
 
@@ -183,26 +177,14 @@ export const supabaseService = {
         return existingProfile as User;
     }
 
-    // Profile does not exist, create it.
-    console.warn(`Profile for user ${authUser.id} not found. Creating one.`);
-
-    // FIX: Explicitly provide a generic type argument to withTimeout to ensure correct type inference for `count` and `error`.
-    const { count, error: countError } = await withTimeout<PostgrestResponse<User>>(supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true }), API_TIMEOUT);
-
-    if (countError) {
-        console.error("Error counting profiles to determine role:", countError);
-        throw countError;
-    }
-
-    const newRole = (count === null || count === 0) ? Role.Admin : Role.Patient;
+    // Profile does not exist, create it with default role 'paciente'
+    console.warn(`Profile for user ${authUser.id} not found. Creating one as 'paciente'.`);
 
     const profileData = {
         id: authUser.id,
         email: authUser.email,
         name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'Nuevo Usuario',
-        role: newRole,
+        role: Role.Patient, // Siempre crear como paciente
     };
 
     const { data: newProfile, error: insertError } = await withTimeout<PostgrestSingleResponse<User>>(supabase
