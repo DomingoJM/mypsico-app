@@ -92,7 +92,7 @@ const AuthScreen: React.FC = () => {
   return (
     <div 
         className="min-h-screen flex flex-col items-center justify-center p-4 bg-cover bg-center"
-        style={{ backgroundImage: "" }}
+        style={{ background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)" }}
     >
       <div className="absolute inset-0 bg-black/30"></div>
       <div className="w-full max-w-md mx-auto z-10">
