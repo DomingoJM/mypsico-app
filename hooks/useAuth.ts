@@ -1,19 +1,21 @@
 import { useContext } from 'react';
-import { AuthContext } from '../App'; // Ajusta esta ruta si es necesario
-import { User } from '../types';
+import { AuthContext } from '../App';
+import { User, Role } from '../types';
 
+// Interface corregida para que coincida con App.tsx
 interface AuthContextType {
   user: User | null;
   originalUser: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
   logoUrl: string | null;
   setLogoUrl: (url: string | null) => void;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<{ user: any, session: any }>;
-  simulateRole: (role: string) => void;
+  simulateRole: (role: Role) => void;
 }
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
@@ -26,10 +28,9 @@ export const useAuthActions = () => {
   const { user, setUser } = useAuth();
   
   const updateUserProfile = (updates: Partial<User>) => {
-    if (user) {
+    if (user && setUser) {
       const updatedUser = { ...user, ...updates };
-      // Aquí necesitamos actualizar el estado, pero como no tenemos setUser directamente,
-      // necesitamos una forma de actualizarlo
+      setUser(updatedUser);
       return updatedUser;
     }
     return null;
