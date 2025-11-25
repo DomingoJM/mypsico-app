@@ -12,7 +12,6 @@ export interface User {
   email: string;
   role: Role;
   name: string;
-  hasCompletedSurvey: boolean;
   therapistId?: string;
   spiritual_path?: string;
   primary_condition?: string;
