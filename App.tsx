@@ -27,17 +27,13 @@ export const AuthContext = React.createContext<{
 
 const ConfigurationErrorScreen: React.FC<{ error: string }> = ({ error }) => {
     const isSupabaseError = error.includes("Supabase");
-    const isGeminiError = error.includes("Gemini");
-
+    
     const requiredKeys = [];
     if (isSupabaseError) {
         requiredKeys.push({ name: 'VITE_SUPABASE_URL' });
         requiredKeys.push({ name: 'VITE_SUPABASE_ANON_KEY' });
     }
-    if (isGeminiError) {
-        requiredKeys.push({ name: 'VITE_API_KEY' });
-    }
-
+    
     const handleCopy = (text: string) => {
       navigator.clipboard.writeText(text);
     };
@@ -64,16 +60,7 @@ const ConfigurationErrorScreen: React.FC<{ error: string }> = ({ error }) => {
                 <div className="mt-6">
                   <p className="text-slate-700">Para solucionar este problema, debes añadir las siguientes "variables de entorno" a la configuración de tu proyecto en Vercel (o tu plataforma de despliegue) y luego hacer un **Redeploy**.</p>
                   <div className="mt-4 space-y-4 font-mono text-sm">
-                      {requiredKeys.map(key => (
-                          <div key={key.name} className="flex items-center justify-between bg-slate-50 p-3 rounded-lg border">
-                              <code className="bg-slate-200 text-slate-800 px-2 py-1 rounded">{key.name}</code>
-                              <button onClick={() => handleCopy(key.name)} className="px-3 py-1 bg-slate-200 hover:bg-slate-300 text-slate-600 rounded text-xs font-sans font-semibold">Copiar Nombre</button>
-                          </div>
-                      ))}
-                  </div>
-                </div>
-              )}
-              
+                                    
               <div className="mt-8 text-center">
                   <button onClick={() => window.location.reload()} className="w-full sm:w-auto bg-brand-primary text-white py-3 px-8 rounded-lg font-semibold hover:bg-brand-dark transition-colors text-lg">
                       Refrescar Página
@@ -216,15 +203,18 @@ const App: React.FC = () => {
             element={user ? (
               <>
                 <Dashboard />
-                <ConsentModal 
-                  isOpen={user && !user.hasCompletedSurvey && user.role === 'paciente'}
-                  onClose={() => {}}
-                  onAccept={async () => {
-                    await supabaseService.updateUserProfile(user.id, { has_completed_survey: true });
-                    // Actualizar estado local
-                    setUser({ ...user, hasCompletedSurvey: true });
-                  }}
-                />
+                {/*
+  // Modal de consentimiento eliminado porque ya no se usa la encuesta interna
+  <ConsentModal 
+    isOpen={user && !user.hasCompletedSurvey && user.role === 'paciente'}
+    onClose={() => {}}
+    onAccept={async () => {
+      await supabaseService.updateUserProfile(user.id, { has_completed_survey: true });
+      // Actualizar estado local
+      setUser({ ...user, hasCompletedSurvey: true });
+    }}
+  />
+*/}
               </>
             ) : (
               <Navigate to="/auth" replace />
