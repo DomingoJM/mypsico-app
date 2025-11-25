@@ -4,43 +4,55 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MYPSICO</title>
+    <title>MYPSICO - Tu espacio para sanar</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind Config -->
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'brand-primary': '#6B7A8F',
-                        'brand-secondary': '#F7C59F',
-                        'brand-light': '#FDFBF7',
-                        'brand-dark': '#414A5A',
-                        'brand-accent': '#D8A7B1',
-                        'brand-text': '#414A5A',
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        serif: ['Lora', 'serif'],
-                    }
-                },
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'brand-primary': '#6B7A8F',
+              'brand-secondary': '#F7C59F', 
+              'brand-light': '#FDFBF7',
+              'brand-dark': '#414A5A',
+              'brand-accent': '#D8A7B1',
+              'brand-text': '#414A5A',
             },
-        }
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              serif: ['Lora', 'serif'],
+            }
+          },
+        },
+      }
     </script>
+    
+    <!-- Estilos mínimos -->
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        
-        @keyframes fade-in-up {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
+      body { 
+        font-family: 'Inter', sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      #root {
+        min-height: 100vh;
+      }
     </style>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <noscript>Necesitas habilitar JavaScript para ejecutar esta aplicación.</noscript>
+    <div id="root">Cargando MyPsico...</div>
+    
+    <!-- ELIMINADO: Todos los scripts problemáticos -->
+    <!-- SOLO Vite manejará los módulos -->
   </body>
 </html>
