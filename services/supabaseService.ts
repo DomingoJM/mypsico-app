@@ -91,7 +91,7 @@ export const supabaseService = {
       email,
       password,
       options: {
-        data: { name },
+         { name },
       },
     }), API_TIMEOUT);
     if (error) throw error;
@@ -103,11 +103,11 @@ export const supabaseService = {
       if (!userData.email || !userData.password) throw new Error("Email and password are required.");
       
       // FIX: Explicitly provide generic type argument to withTimeout to fix type inference.
-      const { data: authData, error: authError } = await withTimeout<AuthResponse>(supabase.auth.signUp({
+      const {  authData, error: authError } = await withTimeout<AuthResponse>(supabase.auth.signUp({
           email: userData.email,
           password: userData.password,
           options: {
-              data: {
+               {
                   name: userData.name,
               },
           },
@@ -122,14 +122,14 @@ export const supabaseService = {
       if (userData.photoFile) {
           const filePath = `patient_photos/${userId}/${userData.photoFile.name}`;
           // FIX(line:372): Replaced `AuthError` with `any` for the error type, as Supabase's `StorageError` is not compatible and not exported.
-          const { error: uploadError } = await withTimeout<{ data: { path: string } | null; error: any }>(supabase.storage
+          const { error: uploadError } = await withTimeout<{  { path: string } | null; error: any }>(supabase.storage
               .from('user-assets')
               .upload(filePath, userData.photoFile), API_TIMEOUT);
 
           if (uploadError) {
               console.error("Error subiendo la foto, continuando sin ella:", uploadError);
           } else {
-              const { data: urlData } = supabase.storage.from('user-assets').getPublicUrl(filePath);
+              const {  urlData } = supabase.storage.from('user-assets').getPublicUrl(filePath);
               photoUrl = urlData.publicUrl;
           }
       }
@@ -149,7 +149,7 @@ export const supabaseService = {
           role: Role.Patient,
       };
       
-      const { data: profileData, error: profileError } = await withTimeout<PostgrestSingleResponse<User>>(supabase
+      const {  profileData, error: profileError } = await withTimeout<PostgrestSingleResponse<User>>(supabase
           .from('profiles')
           .insert(profileUpdates)
           .select()
@@ -161,45 +161,44 @@ export const supabaseService = {
   },
 
   getUserProfile: async (authUser: AuthUser): Promise<User> => {
-  if (!supabase) throw new Error("Supabase client not initialized.");
+    if (!supabase) throw new Error("Supabase client not initialized.");
 
-  const { data: existingProfile, error: getError } = await withTimeout<PostgrestSingleResponse<User>>(
-    supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', authUser.id)
-      .single(), 
-    API_TIMEOUT
-  );
+    const {  existingProfile, error: getError } = await withTimeout<PostgrestSingleResponse<User>>(
+      supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', authUser.id)
+        .single(), 
+      API_TIMEOUT
+    );
 
-  if (existingProfile) {
-    return existingProfile as User;
-  }
+    if (existingProfile) {
+      return existingProfile as User;
+    }
 
-  // Si no existe, crear perfil simple como paciente
-  const profileData = {
-    id: authUser.id,
-    email: authUser.email,
-    name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'Nuevo Usuario',
-    role: Role.Patient,
-  };
+    // Si no existe, crear perfil simple como paciente
+    const profileData = {
+      id: authUser.id,
+      email: authUser.email,
+      name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'Nuevo Usuario',
+      role: Role.Patient,
+    };
 
-  const { data: newProfile, error: insertError } = await withTimeout<PostgrestSingleResponse<User>>(
-    supabase
-      .from('profiles')
-      .insert(profileData)
-      .select()
-      .single(),
-    API_TIMEOUT
-  );
+    const {  newProfile, error: insertError } = await withTimeout<PostgrestSingleResponse<User>>(
+      supabase
+        .from('profiles')
+        .insert(profileData)
+        .select()
+        .single(),
+      API_TIMEOUT
+    );
 
-  if (insertError) {
-    console.error("Error creating profile:", insertError);
-    throw insertError;
-  }
+    if (insertError) {
+      console.error("Error creating profile:", insertError);
+      throw insertError;
+    }
 
-  return newProfile as User;
-},
+    return newProfile as User;
   },
 
   getUsers: async (): Promise<User[]> => {
@@ -300,7 +299,7 @@ export const supabaseService = {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const { data: logs, error } = await withTimeout<PostgrestResponse<ActivityLog>>(
+    const {  logs, error } = await withTimeout<PostgrestResponse<ActivityLog>>(
         supabase
             .from('activity_logs')
             .select('*')
