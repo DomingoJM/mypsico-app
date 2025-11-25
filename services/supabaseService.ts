@@ -42,7 +42,6 @@
 */
 
 import { supabase } from '../supabase';
-// FIX: Removed unexported `StorageError` from imports.
 import type { User as AuthUser, Session, AuthResponse, AuthError, PostgrestSingleResponse, PostgrestResponse } from '@supabase/supabase-js';
 import { User, Role, ContentItem, ProgressData, TodoItem, ActivityLog, PromotionalItem } from '../types';
 
@@ -50,8 +49,7 @@ type UserFormData = Partial<User> & { password?: string, photoFile?: File };
 
 const API_TIMEOUT = 120000; // 120 segundos (2 minutos)
 
-// FIX: Changed `promise` parameter type from `Promise<T>` to `PromiseLike<T>` to correctly handle Supabase's "thenable" query builders.
-export const withTimeout = <T>(promise: PromiseLike<T>, ms: number): Promise<T> => {
+export const withTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => {
     return new Promise((resolve, reject) => {
         const timeoutId = setTimeout(() => {
             reject(new Error(`La operación tardó demasiado en responder (más de ${ms / 1000} segundos). Esto puede deberse a un problema de conexión o a que la base de datos del proyecto no está activa.`));
@@ -80,7 +78,6 @@ export const supabaseService = {
 
   logout: async (): Promise<void> => {
     if (!supabase) throw new Error("Supabase client not initialized.");
-    // FIX: Explicitly provide generic type argument to withTimeout to fix type inference.
     const { error } = await withTimeout<{ error: AuthError | null }>(supabase.auth.signOut(), API_TIMEOUT);
     if (error) throw error;
   },
@@ -91,7 +88,7 @@ export const supabaseService = {
       email,
       password,
       options: {
-         { name },
+        data: { name },
       },
     }), API_TIMEOUT);
     if (error) throw error;
@@ -102,14 +99,13 @@ export const supabaseService = {
       if (!supabase) throw new Error("Supabase client not initialized.");
       if (!userData.email || !userData.password) throw new Error("Email and password are required.");
       
-      // FIX: Explicitly provide generic type argument to withTimeout to fix type inference.
-      const {  authData, error: authError } = await withTimeout<AuthResponse>(supabase.auth.signUp({
+      const { data: authData, error: authError } = await withTimeout<AuthResponse>(supabase.auth.signUp({
           email: userData.email,
           password: userData.password,
           options: {
-               {
-                  name: userData.name,
-              },
+            data: {
+                name: userData.name,
+            },
           },
       }), API_TIMEOUT);
 
@@ -121,15 +117,14 @@ export const supabaseService = {
 
       if (userData.photoFile) {
           const filePath = `patient_photos/${userId}/${userData.photoFile.name}`;
-          // FIX(line:372): Replaced `AuthError` with `any` for the error type, as Supabase's `StorageError` is not compatible and not exported.
-          const { error: uploadError } = await withTimeout<{  { path: string } | null; error: any }>(supabase.storage
+          const { error: uploadError } = await withTimeout<{ data: { path: string } | null; error: any }>(supabase.storage
               .from('user-assets')
               .upload(filePath, userData.photoFile), API_TIMEOUT);
 
           if (uploadError) {
               console.error("Error subiendo la foto, continuando sin ella:", uploadError);
           } else {
-              const {  urlData } = supabase.storage.from('user-assets').getPublicUrl(filePath);
+              const { data: urlData } = supabase.storage.from('user-assets').getPublicUrl(filePath);
               photoUrl = urlData.publicUrl;
           }
       }
@@ -145,11 +140,10 @@ export const supabaseService = {
           treatment_plan: userData.treatment_plan,
           follow_up_and_control: userData.follow_up_and_control,
           therapistId: therapistId,
-          // Siempre crear como paciente por defecto
           role: Role.Patient,
       };
       
-      const {  profileData, error: profileError } = await withTimeout<PostgrestSingleResponse<User>>(supabase
+      const { data: profileData, error: profileError } = await withTimeout<PostgrestSingleResponse<User>>(supabase
           .from('profiles')
           .insert(profileUpdates)
           .select()
@@ -163,7 +157,7 @@ export const supabaseService = {
   getUserProfile: async (authUser: AuthUser): Promise<User> => {
     if (!supabase) throw new Error("Supabase client not initialized.");
 
-    const {  existingProfile, error: getError } = await withTimeout<PostgrestSingleResponse<User>>(
+    const { data: existingProfile, error: getError } = await withTimeout<PostgrestSingleResponse<User>>(
       supabase
         .from('profiles')
         .select('*')
@@ -176,7 +170,6 @@ export const supabaseService = {
       return existingProfile as User;
     }
 
-    // Si no existe, crear perfil simple como paciente
     const profileData = {
       id: authUser.id,
       email: authUser.email,
@@ -184,7 +177,7 @@ export const supabaseService = {
       role: Role.Patient,
     };
 
-    const {  newProfile, error: insertError } = await withTimeout<PostgrestSingleResponse<User>>(
+    const { data: newProfile, error: insertError } = await withTimeout<PostgrestSingleResponse<User>>(
       supabase
         .from('profiles')
         .insert(profileData)
@@ -269,15 +262,12 @@ export const supabaseService = {
   deleteContent: async (contentId: number): Promise<void> => {
     if (!supabase) throw new Error("Supabase client not initialized.");
     
-    // The error object will be populated on failure, e.g. RLS violation.
-    // If the row doesn't exist, Supabase delete doesn't error out, which is acceptable.
     const { error } = await withTimeout<PostgrestResponse<never>>(supabase
       .from('content')
       .delete()
       .eq('id', contentId), API_TIMEOUT);
     
     if (error) {
-      // Propagate the specific Supabase error for the UI to handle.
       throw error;
     }
   },
@@ -285,21 +275,10 @@ export const supabaseService = {
   getProgressData: async (userId: string): Promise<ProgressData[]> => {
     if (!supabase) throw new Error("Supabase client not initialized.");
 
-    // NOTE: This implementation has been reverted to client-side aggregation.
-    // The previous implementation used a database RPC ('get_daily_progress_report'),
-    // which was failing with a "column 'mood' does not exist" error. This indicates
-    // a potential mismatch between the application's expected database schema and the
-    // deployed schema.
-    // This client-side version is more resilient to schema variations (e.g., using
-    // 'rating' as a fallback for 'mood') and will prevent the app from crashing.
-    // However, it may be slower for users with a very long activity history.
-    // For a long-term fix, the 'get_daily_progress_report' RPC function and the
-    // 'activity_logs' table schema in Supabase should be inspected and aligned.
-
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const {  logs, error } = await withTimeout<PostgrestResponse<ActivityLog>>(
+    const { data: logs, error } = await withTimeout<PostgrestResponse<ActivityLog>>(
         supabase
             .from('activity_logs')
             .select('*')
@@ -309,8 +288,6 @@ export const supabaseService = {
     );
 
     if (error) {
-        // The error from the RPC was "column mood does not exist". If a simple select
-        // also fails, we re-throw it.
         throw error;
     }
     if (!logs) {
@@ -327,7 +304,6 @@ export const supabaseService = {
             groupedByDate[date] = { mood: [], anxiety: [], stress: [], count: 0 };
         }
         
-        // Use 'rating' as a fallback for 'mood' for backward compatibility or schema differences.
         const moodValue = log.mood ?? log.rating;
 
         if (moodValue !== null && typeof moodValue !== 'undefined') {
@@ -346,7 +322,7 @@ export const supabaseService = {
       .sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime());
 
     const progressData: ProgressData[] = sortedEntries.map(([date, values]) => {
-        const avg = (arr: number[]) => arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 3; // Default to neutral 3 if no data for the day
+        const avg = (arr: number[]) => arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 3;
         
         return {
             date: new Date(date).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' }),
@@ -422,7 +398,7 @@ export const supabaseService = {
         mood: log.mood,
         anxiety: log.anxiety,
         stress: log.stress,
-        rating: log.mood, // Use mood as the general rating for backwards compatibility
+        rating: log.mood,
       })
       .select()
       .single(), API_TIMEOUT);
@@ -441,7 +417,6 @@ export const supabaseService = {
     return data as ActivityLog[];
   },
 
-  // New functions for settings
   getSetting: async (key: string): Promise<string | null> => {
     if (!supabase) throw new Error("Supabase client not initialized.");
     const { data, error } = await withTimeout<PostgrestSingleResponse<{ value: string }>>(supabase
@@ -450,7 +425,7 @@ export const supabaseService = {
         .eq('key', key)
         .single(), API_TIMEOUT);
     if (error) {
-        if (error.code === 'PGRST116') return null; // Not found is okay
+        if (error.code === 'PGRST116') return null;
         throw error;
     }
     return data?.value || null;
@@ -466,7 +441,6 @@ export const supabaseService = {
 
   uploadAppAsset: async (filePath: string, file: File): Promise<string> => {
       if (!supabase) throw new Error("Supabase client not initialized.");
-      // FIX(line:655): Replaced `AuthError` with `any` for the error type, as Supabase's `StorageError` is not compatible and not exported.
       const { error: uploadError } = await withTimeout<{ data: { path: string } | null; error: any }>(supabase.storage
           .from('app-assets')
           .upload(filePath, file, {
@@ -477,11 +451,9 @@ export const supabaseService = {
       if (uploadError) throw uploadError;
 
       const { data: urlData } = supabase.storage.from('app-assets').getPublicUrl(filePath);
-      // Add a timestamp to bust the cache immediately after upload
       return `${urlData.publicUrl}?t=${new Date().getTime()}`;
   },
 
-  // Promotional Items
   getPromotionalItems: async (): Promise<PromotionalItem[]> => {
     if (!supabase) throw new Error("Supabase client not initialized.");
     const { data, error } = await withTimeout<PostgrestResponse<PromotionalItem>>(supabase.from('promotional_items').select('*').order('created_at', { ascending: false }), API_TIMEOUT);
@@ -492,7 +464,7 @@ export const supabaseService = {
   getActivePromotionalItem: async (): Promise<PromotionalItem | null> => {
     if (!supabase) throw new Error("Supabase client not initialized.");
     const { data, error } = await withTimeout<PostgrestSingleResponse<PromotionalItem>>(supabase.from('promotional_items').select('*').eq('is_active', true).limit(1).single(), API_TIMEOUT);
-    if (error && error.code !== 'PGRST116') throw error; // Ignore "no rows found" error
+    if (error && error.code !== 'PGRST116') throw error;
     return data as PromotionalItem | null;
   },
 
@@ -510,7 +482,6 @@ export const supabaseService = {
   updatePromotionalItem: async (id: number, updates: Partial<PromotionalItem>): Promise<PromotionalItem> => {
     if (!supabase) throw new Error("Supabase client not initialized.");
 
-    // If we are activating an item, we must deactivate all others first.
     if (updates.is_active === true) {
       const { error: deactivateError } = await supabase
         .from('promotional_items')
