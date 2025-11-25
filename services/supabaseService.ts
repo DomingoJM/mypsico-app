@@ -161,44 +161,45 @@ export const supabaseService = {
   },
 
   getUserProfile: async (authUser: AuthUser): Promise<User> => {
-    if (!supabase) throw new Error("Supabase client not initialized.");
+  if (!supabase) throw new Error("Supabase client not initialized.");
 
-    const { data: existingProfile, error: getError } = await withTimeout<PostgrestSingleResponse<User>>(supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', authUser.id)
-        .single(), API_TIMEOUT);
+  const { data: existingProfile, error: getError } = await withTimeout<PostgrestSingleResponse<User>>(
+    supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', authUser.id)
+      .single(), 
+    API_TIMEOUT
+  );
 
-    if (getError && getError.code !== 'PGRST116') { // PGRST116 means no rows found
-        throw getError;
-    }
+  if (existingProfile) {
+    return existingProfile as User;
+  }
 
-    if (existingProfile) {
-        return existingProfile as User;
-    }
+  // Si no existe, crear perfil simple como paciente
+  const profileData = {
+    id: authUser.id,
+    email: authUser.email,
+    name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'Nuevo Usuario',
+    role: Role.Patient,
+  };
 
-    // Profile does not exist, create it with default role 'paciente'
-    console.warn(`Profile for user ${authUser.id} not found. Creating one as 'paciente'.`);
+  const { data: newProfile, error: insertError } = await withTimeout<PostgrestSingleResponse<User>>(
+    supabase
+      .from('profiles')
+      .insert(profileData)
+      .select()
+      .single(),
+    API_TIMEOUT
+  );
 
-    const profileData = {
-        id: authUser.id,
-        email: authUser.email,
-        name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'Nuevo Usuario',
-        role: Role.Patient, // Siempre crear como paciente
-    };
+  if (insertError) {
+    console.error("Error creating profile:", insertError);
+    throw insertError;
+  }
 
-    const { data: newProfile, error: insertError } = await withTimeout<PostgrestSingleResponse<User>>(supabase
-        .from('profiles')
-        .insert(profileData)
-        .select()
-        .single(), API_TIMEOUT);
-
-    if (insertError) {
-        console.error("Error creating missing profile:", insertError);
-        throw insertError;
-    }
-
-    return newProfile as User;
+  return newProfile as User;
+},
   },
 
   getUsers: async (): Promise<User[]> => {
