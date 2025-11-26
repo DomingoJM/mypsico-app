@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { User } from '../types';
-import { supabaseService } from '../services/supabaseService';
+import { supabaseService } from '../src/services/supabaseService';
 import { useAuth } from './useAuth';
 
 export const useConsent = () => {

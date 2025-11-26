@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { contentService, DailyContent } from '../../services/contentService';
-import ConsentModal from '../../components/consent/ConsentModal';
-import LoadingScreen from '../../components/shared/LoadingScreen';
+import { contentService, DailyContent } from '../../src/services/contentService';
+import ConsentModal from '../../src/components/consent/ConsentModal';
+import LoadingScreen from '../../src/shared/LoadingScreen';
 
 const PublicHome: React.FC = () => {
   const navigate = useNavigate();

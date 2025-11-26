@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { AuthContext } from '../App';
+import { AuthContext } from '../src/App';
 import { User, Role } from '../types';
 
 // Interface corregida para que coincida con App.tsx
