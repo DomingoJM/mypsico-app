@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { AuthContext } from '../../App';
-import { EyeIcon, EyeSlashIcon } from '../../shared/Icons';
+import { AuthContext } from '../App';
+import { EyeIcon, EyeSlashIcon } from '../shared/Icons';
 
 const AuthScreen: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);

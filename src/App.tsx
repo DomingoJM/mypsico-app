@@ -2,7 +2,7 @@ import React, { useState, useEffect, createContext } from "react";
 import { supabase } from "./supabase";
 import LoadingScreen from "./shared/LoadingScreen";
 import { AppLogo } from "./shared/AppLogo";
-import AuthScreen from "./components/auth/AuthScreen";
+import AuthScreen from "./auth/AuthScreen";
 
 // Definir el tipo del contexto
 interface AuthContextType {
