@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { contentService, DailyContent } from '../../services/contentService';
-import ConsentModal from '../consent/ConsentModal';
+import ConsentModal from '../../components/consent/ConsentModal';
 import LoadingScreen from '../../components/shared/LoadingScreen';
 
 const PublicHome: React.FC = () => {
