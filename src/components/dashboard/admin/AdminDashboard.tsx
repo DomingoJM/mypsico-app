@@ -1,61 +1,50 @@
+import { useAuth } from "@/hooks/useAuth";
+import { Link } from "react-router-dom";
 
+export default function AdminDashboard() {
+  const { user, logout } = useAuth();
 
-import React, { useState } from 'react';
-import UserManagement from '../shared/UserManagement';
-import ContentManagement from '../shared/ContentManagement';
-import { Role } from '../../../../types';
-import PromotionalItemsManagement from '../shared/PromotionalItemsManagement';
+  if (!user) return <p className="text-center mt-10">Cargando...</p>;
 
-const AdminDashboard: React.FC = () => {
-    const [activeTab, setActiveTab] = useState('users');
+  return (
+    <div className="min-h-screen bg-gray-50 text-gray-700">
 
-    const GlobalReports = () => (
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-brand-dark">Reportes Globales</h2>
-        <p className="mt-2 text-slate-600">Esta función está en desarrollo. Aquí podrá ver estadísticas de uso de la aplicación y descargar informes globales.</p>
-        <button disabled className="mt-4 px-4 py-2 bg-slate-400 text-white rounded-lg font-semibold cursor-not-allowed">
-          Generar Reporte Global
+      {/* Header */}
+      <header className="flex justify-between items-center px-6 py-4 border-b bg-white">
+        <span className="font-semibold">Panel Administrador</span>
+        <button
+          onClick={logout}
+          className="px-3 py-1 text-sm border rounded hover:bg-gray-100">
+          Cerrar sesión
         </button>
-      </div>
-    );
+      </header>
 
-    return (
-        <div>
-            <div className="mb-6 border-b border-gray-200">
-                <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-                    <button
-                        onClick={() => setActiveTab('users')}
-                        className={`${activeTab === 'users' ? 'border-brand-primary text-brand-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg`}
-                    >
-                        Gestionar Usuarios
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('content')}
-                        className={`${activeTab === 'content' ? 'border-brand-primary text-brand-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg`}
-                    >
-                        Gestionar Contenido
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('promotions')}
-                        className={`${activeTab === 'promotions' ? 'border-brand-primary text-brand-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg`}
-                    >
-                        Gestionar Promociones
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('reports')}
-                        className={`${activeTab === 'reports' ? 'border-brand-primary text-brand-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg`}
-                    >
-                        Reportes Globales
-                    </button>
-                </nav>
-            </div>
-            
-            {activeTab === 'users' && <UserManagement manageableRole={Role.Admin} />}
-            {activeTab === 'content' && <ContentManagement />}
-            {activeTab === 'promotions' && <PromotionalItemsManagement />}
-            {activeTab === 'reports' && <GlobalReports />}
+      <main className="max-w-6xl mx-auto p-6 space-y-8">
+
+        <h1 className="text-2xl font-semibold">Bienvenido, Admin</h1>
+        <p className="text-gray-500">Aquí podrás gestionar todo el sistema.</p>
+
+        {/* Opciones */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          {[
+            { name: "Gestión de Usuarios", route: "/admin/users" },
+            { name: "Pacientes", route: "/admin/patients" },
+            { name: "Contenido y Recursos", route: "/admin/content" },
+            { name: "Reportes", route: "/admin/reports" },
+            { name: "Configuración General", route: "/admin/settings" }
+          ].map((i) => (
+            <Link
+              key={i.route}
+              to={i.route}
+              className="border p-6 rounded-lg bg-white shadow-sm hover:shadow-md transition text-center"
+            >
+              {i.name}
+            </Link>
+          ))}
+
         </div>
-    );
-};
-
-export default AdminDashboard;
+      </main>
+    </div>
+  );
+}
