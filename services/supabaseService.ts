@@ -1,5 +1,5 @@
 // src/lib/supabaseService.ts
-import { supabase } from './supabaseClient';
+import { supabase } from '../supabase';
 
 const TIMEOUT = 15000;
 const withTimeout = <T>(promise: Promise<T>, ms = TIMEOUT) =>
