@@ -77,11 +77,13 @@ const AppContent: React.FC = () => {
     if (authError) throw authError;
 
     if (authData.user) {
+      // Todos los registros públicos son automáticamente pacientes
       await supabase.from("profiles").insert({
         id: authData.user.id,
         name,
         email,
-        role: "patient" // default
+        role: "patient", // Auto-asignado
+        status: "active"
       });
     }
 

@@ -8,7 +8,9 @@ interface User {
   email: string;
   role: 'admin' | 'therapist' | 'patient' | 'visitor';
   created_at: string;
-  active?: boolean;
+  status?: string;
+  therapist_id?: string;
+  created_by?: string;
 }
 
 export default function UsersManagement() {
@@ -17,11 +19,25 @@ export default function UsersManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState<string>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newUser, setNewUser] = useState({ name: '', email: '', role: 'patient', age: '', cv_link: '' });
+  const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'therapist', cv_link: '' });
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
     loadUsers();
+    getCurrentUser();
   }, []);
+
+  const getCurrentUser = async () => {
+    const { data } = await supabase.auth.getUser();
+    if (data.user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
+      setCurrentUser(profile);
+    }
+  };
 
   const loadUsers = async () => {
     setLoading(true);
@@ -29,6 +45,7 @@ export default function UsersManagement() {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
+        .neq('status', 'deleted') // No mostrar usuarios eliminados
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -69,9 +86,65 @@ export default function UsersManagement() {
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Implementar creación de usuario
-    console.log('Crear usuario:', newUser);
-    setShowCreateModal(false);
+    try {
+      // Solo admin puede crear therapist o admin
+      if (newUser.role !== 'therapist' && newUser.role !== 'admin') {
+        alert('Admin solo puede crear Terapeutas o Administradores. Los pacientes se registran públicamente.');
+        return;
+      }
+
+      // Crear usuario en auth
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email: newUser.email,
+        password: newUser.password,
+        email_confirm: true
+      });
+
+      if (authError) throw authError;
+
+      // Crear perfil
+      if (authData.user) {
+        const { error: profileError } = await supabase.from('profiles').insert({
+          id: authData.user.id,
+          name: newUser.name,
+          email: newUser.email,
+          role: newUser.role,
+          status: 'active',
+          created_by: currentUser?.id,
+          cv_link: newUser.role === 'therapist' ? newUser.cv_link : null
+        });
+
+        if (profileError) throw profileError;
+      }
+
+      alert(`✅ ${newUser.role === 'therapist' ? 'Terapeuta' : 'Administrador'} creado exitosamente`);
+      setShowCreateModal(false);
+      setNewUser({ name: '', email: '', password: '', role: 'therapist', cv_link: '' });
+      loadUsers();
+    } catch (error: any) {
+      console.error('Error creating user:', error);
+      alert('❌ Error al crear usuario: ' + error.message);
+    }
+  };
+
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    if (!confirm(`¿Estás seguro de eliminar a ${userName}?`)) return;
+    
+    try {
+      // Soft delete - cambiar status a 'deleted'
+      const { error } = await supabase
+        .from('profiles')
+        .update({ status: 'deleted' })
+        .eq('id', userId);
+
+      if (error) throw error;
+      
+      alert('✅ Usuario eliminado correctamente');
+      loadUsers();
+    } catch (error: any) {
+      console.error('Error deleting user:', error);
+      alert('❌ Error al eliminar usuario: ' + error.message);
+    }
   };
 
   return (
@@ -198,10 +271,10 @@ export default function UsersManagement() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex justify-center gap-2">
-                          <button className="px-3 py-1.5 text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg font-medium transition-colors">
-                            Editar
-                          </button>
-                          <button className="px-3 py-1.5 text-sm bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-medium transition-colors">
+                          <button 
+                            onClick={() => handleDeleteUser(user.id, user.name)}
+                            className="px-3 py-1.5 text-sm bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-medium transition-colors"
+                          >
                             Eliminar
                           </button>
                         </div>
@@ -250,17 +323,28 @@ export default function UsersManagement() {
                 />
               </div>
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Contraseña temporal</label>
+                <input
+                  type="password"
+                  value={newUser.password}
+                  onChange={(e) => setNewUser({...newUser, password: e.target.value})}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400"
+                  required
+                  minLength={6}
+                  placeholder="Mínimo 6 caracteres"
+                />
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Rol</label>
                 <select
                   value={newUser.role}
                   onChange={(e) => setNewUser({...newUser, role: e.target.value})}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400"
                 >
-                  <option value="patient">Paciente</option>
                   <option value="therapist">Terapeuta</option>
                   <option value="admin">Administrador</option>
-                  <option value="visitor">Visitante</option>
                 </select>
+                <p className="text-xs text-gray-500 mt-1">💡 Los pacientes se registran automáticamente desde el formulario público</p>
               </div>
               {newUser.role === 'therapist' && (
                 <div>
