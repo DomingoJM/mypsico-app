@@ -53,7 +53,7 @@ const LoadingScreen: React.FC = () => {
 
         {/* Marca elegante */}
         <h2 className="text-3xl font-serif tracking-[0.20em] text-gray-700 slide-up mb-2">
-          MyPsΨco
+          MyPs<span style={{fontSize: '0.75em'}}>Ψ</span>co
         </h2>
 
         {/* Eslogan sutil */}

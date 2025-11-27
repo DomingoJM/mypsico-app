@@ -49,7 +49,7 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-3">
             <img src="/MyPsico.png" alt="MyPsico" className="h-14" />
             <div>
-              <span className="font-serif text-2xl text-gray-800">MyPsΨco</span>
+              <span className="font-serif text-2xl text-gray-800">MyPs<span style={{fontSize: '0.75em'}}>Ψ</span>co</span>
               <p className="text-sm text-purple-600 font-medium">Panel Administrador</p>
             </div>
           </div>

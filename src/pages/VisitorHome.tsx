@@ -47,7 +47,7 @@ export default function VisitorHome() {
       <header className="w-full py-6 px-6 flex justify-between items-center bg-white/80 backdrop-blur-sm sticky top-0 z-40 shadow-sm">
         <div className="flex items-center gap-3">
           <img src="/MyPsico.png" alt="MyPsico" className="h-14 opacity-90" />
-          <span className="font-serif text-2xl text-gray-700 tracking-wide">MyPsΨco</span>
+          <span className="font-serif text-2xl text-gray-700 tracking-wide">MyPs<span style={{fontSize: '0.75em'}}>Ψ</span>co</span>
         </div>
         <Link 
           to="/login" 
@@ -69,7 +69,7 @@ export default function VisitorHome() {
         
         <div className="relative z-10 max-w-4xl mx-auto fade-in-up">
           <h1 className="text-5xl md:text-6xl font-serif text-gray-800 mb-6 leading-tight">
-            Bienvenido a <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600">MyPsΨco</span>
+            Bienvenido a <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600">MyPs<span style={{fontSize: '0.75em'}}>Ψ</span>co</span>
           </h1>
           <p className="text-xl md:text-2xl text-gray-600 font-light mb-8 max-w-3xl mx-auto">
             Tu espacio para el crecimiento personal y el bienestar emocional
@@ -158,7 +158,7 @@ export default function VisitorHome() {
       {/* Footer */}
       <footer className="w-full py-8 px-6 bg-gray-50 text-center text-gray-600 border-t border-gray-200">
         <p className="text-sm">
-          © 2025 MyPsΨco - Tu espacio para sanar
+          © 2025 MyPs<span style={{fontSize: '0.75em'}}>Ψ</span>co - Tu espacio para sanar
         </p>
       </footer>
     </div>
