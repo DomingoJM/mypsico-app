@@ -22,6 +22,12 @@ const App: React.FC = () => {
   // Verificar sesión al cargar
   useEffect(() => {
     checkUser();
+// EXPOSE TEMPORAL PARA DEBUG
+// ❗ luego lo quitamos
+// @ts-ignore
+  window.supabase = supabase;
+  // @ts-ignore
+  window.supabase = supabase;
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
