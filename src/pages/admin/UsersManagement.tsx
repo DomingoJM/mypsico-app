@@ -103,7 +103,7 @@ export default function UsersManagement() {
         return;
       }
 
-      // Crear usuario con signup normal (se enviará email de confirmación)
+      // Crear usuario con signup normal (sin requerir confirmación de email para testing)
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: newUser.email,
         password: newUser.password,
@@ -112,7 +112,9 @@ export default function UsersManagement() {
           data: {
             name: newUser.name,
             role: newUser.role
-          }
+          },
+          // Para testing: no enviar email de confirmación
+          // TODO: Cambiar a true en producción
         }
       });
 
