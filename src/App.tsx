@@ -118,6 +118,33 @@ const AppContent: React.FC = () => {
 
       console.log("✅ Rol obtenido:", data?.role);
 
+      // Obtener la ruta actual
+      const currentPath = window.location.pathname;
+      
+      // No redirigir si ya estamos en una ruta válida para el rol
+      if (data?.role === "admin" && currentPath.startsWith("/admin")) {
+        console.log("✅ Ya estás en una ruta de admin válida:", currentPath);
+        setIsRedirecting(false);
+        return;
+      }
+      if (data?.role === "therapist" && currentPath.startsWith("/therapist")) {
+        console.log("✅ Ya estás en una ruta de terapeuta válida:", currentPath);
+        setIsRedirecting(false);
+        return;
+      }
+      if (data?.role === "patient" && currentPath.startsWith("/patient")) {
+        console.log("✅ Ya estás en una ruta de paciente válida:", currentPath);
+        setIsRedirecting(false);
+        return;
+      }
+
+      // Solo redirigir si estamos en root (/) o login
+      if (currentPath !== "/" && currentPath !== "/login") {
+        console.log("✅ Ya estás en una ruta específica, no se redirige");
+        setIsRedirecting(false);
+        return;
+      }
+
       // Usar navigate en lugar de window.location.href
       switch (data?.role) {
         case "patient":
