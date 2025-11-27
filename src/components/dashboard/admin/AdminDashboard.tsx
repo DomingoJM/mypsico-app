@@ -11,9 +11,9 @@ export default function AdminDashboard() {
 
   const menuItems = [
     { name: "Gestión de Usuarios", route: "/admin/users", icon: "👥", color: "from-blue-500 to-cyan-500", description: "Administra usuarios del sistema" },
-    { name: "Pacientes", route: "/admin/patients", icon: "🏥", color: "from-purple-500 to-pink-500", description: "Gestiona pacientes y sus terapias" },
     { name: "Contenido y Recursos", route: "/admin/content", icon: "📚", color: "from-green-500 to-emerald-500", description: "Crea y edita contenido terapéutico" },
-    { name: "Reportes", route: "/admin/reports", icon: "📊", color: "from-orange-500 to-amber-500", description: "Visualiza estadísticas y métricas" },
+    { name: "Promociones", route: "/admin/promotions", icon: "✨", color: "from-amber-500 to-orange-500", description: "Gestiona libros, cursos y promociones" },
+    { name: "Reportes Globales", route: "/admin/reports", icon: "📊", color: "from-purple-500 to-pink-500", description: "Estadísticas generales del sistema" },
     { name: "Configuración General", route: "/admin/settings", icon: "⚙️", color: "from-gray-500 to-slate-500", description: "Ajustes del sistema" }
   ];
 
@@ -102,9 +102,9 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {[
             { label: "Usuarios Totales", value: "124", icon: "👥", color: "text-blue-600" },
-            { label: "Pacientes Activos", value: "89", icon: "🏥", color: "text-purple-600" },
+            { label: "Terapeutas Activos", value: "15", icon: "👨‍⚕️", color: "text-purple-600" },
             { label: "Contenidos", value: "256", icon: "📚", color: "text-green-600" },
-            { label: "Sesiones Hoy", value: "12", icon: "📅", color: "text-orange-600" }
+            { label: "Promociones", value: "8", icon: "✨", color: "text-amber-600" }
           ].map((stat, i) => (
             <div 
               key={i} 
