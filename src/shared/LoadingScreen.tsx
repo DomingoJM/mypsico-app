@@ -47,7 +47,7 @@ const LoadingScreen: React.FC = () => {
           <img 
             src="/MyPsico.png" 
             alt="MyPsico Logo" 
-            className="w-24 h-24 drop-shadow-lg"
+            className="w-32 h-32 drop-shadow-lg"
           />
         </div>
 

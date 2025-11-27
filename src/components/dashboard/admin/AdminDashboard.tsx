@@ -47,7 +47,7 @@ export default function AdminDashboard() {
       <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <img src="/MyPsico.png" alt="MyPsico" className="h-10" />
+            <img src="/MyPsico.png" alt="MyPsico" className="h-14" />
             <div>
               <span className="font-serif text-2xl text-gray-800">MyPsico</span>
               <p className="text-sm text-purple-600 font-medium">Panel Administrador</p>
