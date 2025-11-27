@@ -8,7 +8,7 @@ const LoadingScreen: React.FC = () => {
         
         {/* LOGO — si tu archivo se llama distinto, cambia el nombre */}
         <img 
-          src="/mypsico-logo.png" 
+          src="/MyPsico.png" 
           alt="MyPsico Logo" 
           className="w-20 h-20 mb-6 opacity-90"
         />
