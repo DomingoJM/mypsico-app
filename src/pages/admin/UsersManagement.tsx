@@ -6,7 +6,7 @@ interface User {
   id: string;
   name: string;
   email: string;
-  role: 'admin' | 'therapist' | 'patient' | 'visitor';
+  role: 'admin' | 'terapeuta' | 'paciente' | 'visitante';
   created_at: string;
   status?: string;
   therapist_id?: string;
@@ -20,7 +20,7 @@ export default function UsersManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState<string>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'therapist', cv_link: '' });
+  const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'terapeuta', cv_link: '' });
   const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
@@ -77,15 +77,15 @@ export default function UsersManagement() {
   const getRoleBadge = (role: string) => {
     const styles = {
       admin: 'bg-red-100 text-red-700 border-red-200',
-      therapist: 'bg-purple-100 text-purple-700 border-purple-200',
-      patient: 'bg-blue-100 text-blue-700 border-blue-200',
-      visitor: 'bg-gray-100 text-gray-700 border-gray-200'
+      terapeuta: 'bg-purple-100 text-purple-700 border-purple-200',
+      paciente: 'bg-blue-100 text-blue-700 border-blue-200',
+      visitante: 'bg-gray-100 text-gray-700 border-gray-200'
     };
     const labels = {
       admin: 'Administrador',
-      therapist: 'Terapeuta',
-      patient: 'Paciente',
-      visitor: 'Visitante'
+      terapeuta: 'Terapeuta',
+      paciente: 'Paciente',
+      visitante: 'Visitante'
     };
     return (
       <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${styles[role as keyof typeof styles]}`}>
@@ -97,8 +97,8 @@ export default function UsersManagement() {
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Solo admin puede crear therapist o admin
-      if (newUser.role !== 'therapist' && newUser.role !== 'admin') {
+      // Solo admin puede crear terapeuta o admin
+      if (newUser.role !== 'terapeuta' && newUser.role !== 'admin') {
         alert('Admin solo puede crear Terapeutas o Administradores. Los pacientes se registran públicamente.');
         return;
       }
@@ -133,9 +133,9 @@ export default function UsersManagement() {
         if (profileError) throw profileError;
       }
 
-      alert(`✅ ${newUser.role === 'therapist' ? 'Terapeuta' : 'Administrador'} creado exitosamente.\n\n📧 Se envió un email de confirmación a ${newUser.email}`);
+      alert(`✅ ${newUser.role === 'terapeuta' ? 'Terapeuta' : 'Administrador'} creado exitosamente.\n\n📧 Se envió un email de confirmación a ${newUser.email}`);
       setShowCreateModal(false);
-      setNewUser({ name: '', email: '', password: '', role: 'therapist', cv_link: '' });
+      setNewUser({ name: '', email: '', password: '', role: 'terapeuta', cv_link: '' });
       loadUsers();
     } catch (error: any) {
       console.error('Error creating user:', error);
@@ -357,12 +357,12 @@ export default function UsersManagement() {
                   onChange={(e) => setNewUser({...newUser, role: e.target.value})}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400"
                 >
-                  <option value="therapist">Terapeuta</option>
+                  <option value="terapeuta">Terapeuta</option>
                   <option value="admin">Administrador</option>
                 </select>
                 <p className="text-xs text-gray-500 mt-1">💡 Los pacientes se registran automáticamente desde el formulario público</p>
               </div>
-              {newUser.role === 'therapist' && (
+              {newUser.role === 'terapeuta' && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Link CV / Hoja de vida (opcional)</label>
                   <input

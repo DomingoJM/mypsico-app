@@ -82,7 +82,7 @@ const AppContent: React.FC = () => {
         id: authData.user.id,
         name,
         email,
-        role: "patient", // Auto-asignado
+        role: "paciente", // Auto-asignado (en español)
         status: "active"
       });
     }
