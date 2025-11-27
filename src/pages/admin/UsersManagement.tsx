@@ -102,16 +102,22 @@ export default function UsersManagement() {
         return;
       }
 
-      // Crear usuario en auth
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      // Crear usuario con signup normal (se enviará email de confirmación)
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: newUser.email,
         password: newUser.password,
-        email_confirm: true
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: {
+            name: newUser.name,
+            role: newUser.role
+          }
+        }
       });
 
       if (authError) throw authError;
 
-      // Crear perfil
+      // Crear perfil directamente (incluso antes de confirmar email)
       if (authData.user) {
         const { error: profileError } = await supabase.from('profiles').insert({
           id: authData.user.id,
@@ -126,7 +132,7 @@ export default function UsersManagement() {
         if (profileError) throw profileError;
       }
 
-      alert(`✅ ${newUser.role === 'therapist' ? 'Terapeuta' : 'Administrador'} creado exitosamente`);
+      alert(`✅ ${newUser.role === 'therapist' ? 'Terapeuta' : 'Administrador'} creado exitosamente.\n\n📧 Se envió un email de confirmación a ${newUser.email}`);
       setShowCreateModal(false);
       setNewUser({ name: '', email: '', password: '', role: 'therapist', cv_link: '' });
       loadUsers();
