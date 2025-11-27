@@ -14,6 +14,7 @@ interface User {
 }
 
 export default function UsersManagement() {
+  console.log('🔍 UsersManagement component loaded');
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
