@@ -8,6 +8,7 @@ import TherapistDashboard from "./components/dashboard/therapist/TherapistDashbo
 import PatientDashboard from "./components/dashboard/patient/PatientDashboard";
 import PublicHome from "./pages/PublicHome";
 import VisitorHome from "./pages/VisitorHome";
+import UsersManagement from "./pages/admin/UsersManagement";
 
 // Tipo del contexto
 interface AuthContextType {
@@ -151,6 +152,7 @@ const AppContent: React.FC = () => {
       <Routes>
         <Route path="/login" element={!user ? <AuthScreen /> : <Navigate to="/" replace />} />
         <Route path="/adminDashboard" element={user ? <AdminDashboard /> : <Navigate to="/login" replace />} />
+        <Route path="/admin/users" element={user ? <UsersManagement /> : <Navigate to="/login" replace />} />
         <Route path="/therapistDashboard" element={user ? <TherapistDashboard /> : <Navigate to="/login" replace />} />
         <Route path="/patientHome" element={user ? <PatientDashboard /> : <Navigate to="/login" replace />} />
         <Route path="/publicHome" element={<PublicHome />} />
