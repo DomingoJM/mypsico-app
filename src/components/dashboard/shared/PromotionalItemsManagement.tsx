@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { PromotionalItem } from '../../../../types';
-import { supabaseService } from '../../../services/supabaseService';
+import * as supabaseService from '../../../services/supabaseService';
 import { AuthContext } from '../../../App';
 import PromotionalItemModal from './PromotionalItemModal';
 import { TrashIcon } from '../../../shared/Icons';

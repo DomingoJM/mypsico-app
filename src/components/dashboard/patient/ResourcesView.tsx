@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { PromotionalItem } from '../../../../types';
-import { supabaseService } from '../../../services/supabaseService';
+import * as supabaseService from '../../../services/supabaseService';
 import { BookIcon, VideoIcon } from '../../../shared/Icons';
 
 const ResourceCard: React.FC<{ item: PromotionalItem }> = ({ item }) => (

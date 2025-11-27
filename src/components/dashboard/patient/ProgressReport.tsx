@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ProgressData } from '../../../../types';
-import { supabaseService } from '../../../services/supabaseService';
+import * as supabaseService from '../../../services/supabaseService';
 // @ts-ignore
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 // @ts-ignore

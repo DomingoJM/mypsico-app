@@ -1,5 +1,5 @@
 import React, { useState, ChangeEvent, useContext, useRef } from 'react';
-import { supabaseService } from '../../../services/supabaseService';
+import * as supabaseService from '../../../services/supabaseService';
 import { AuthContext } from '../../../App';
 import { CloseIcon, PhotoIcon, UploadIcon } from '../../../shared/Icons';
 import { PromotionalItem, PromotionalItemType } from '../../../../types';

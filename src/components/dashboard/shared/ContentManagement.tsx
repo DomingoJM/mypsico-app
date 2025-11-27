@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { ContentItem, ContentType } from '../../../../types';
-import { supabaseService } from '../../../services/supabaseService';
+import * as supabaseService from '../../../services/supabaseService';
 import { AuthContext } from '../../../App';
 import ContentUploadModal from './ContentUploadModal'; // Importar el nuevo modal
 import { CloseIcon } from '../../../shared/Icons';

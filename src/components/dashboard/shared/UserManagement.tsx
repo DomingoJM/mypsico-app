@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { User, Role } from '../../../../types';
-import { supabaseService } from '../../../services/supabaseService';
+import * as supabaseService from '../../../services/supabaseService';
 import { AuthContext } from '../../../App';
 import CreatePatientModal from './CreatePatientModal';
 import { CloseIcon } from '../../../shared/Icons';

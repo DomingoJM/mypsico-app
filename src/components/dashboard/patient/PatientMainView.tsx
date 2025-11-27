@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../../context/AuthContext';
-import { supabaseService } from '../../../services/supabaseService';
+import * as supabaseService from '../../../services/supabaseService';
 import DailyPlanView from './DailyPlanView';
 import TodoList from './TodoList';
 import Journal from '../../patient/Journal'; 

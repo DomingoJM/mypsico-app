@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { ContentItem, ContentType, ActivityLog, User } from '../../../../types';
 import { VideoIcon, AudioIcon, TextIcon, CheckCircleIcon, ShareIcon, CloseIcon, PlayCircleIcon } from '../../../shared/Icons';
 import { AuthContext } from '../../../App';
-import { supabaseService } from '../../../services/supabaseService';
+import * as supabaseService from '../../../services/supabaseService';
 import ContentPlayerModal from './ContentPlayerModal';
 
 const MoodTrackerInput: React.FC<{
