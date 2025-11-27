@@ -19,7 +19,7 @@ const LoadingScreen: React.FC = () => {
             opacity: 1;
           }
           100% { 
-            transform: scale(8);
+            transform: scale(5);
             opacity: 0.95;
           }
         }
