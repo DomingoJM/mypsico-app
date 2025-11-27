@@ -146,25 +146,15 @@ const AppContent: React.FC = () => {
   // ------------------------ UI ------------------------
   if (initialLoading || isRedirecting) return <LoadingScreen />;
 
-  if (!user) {
-    return (
-      <AuthContext.Provider value={{ user, login, register, logout }}>
-        <AuthScreen />
-      </AuthContext.Provider>
-    );
-  }
-
-  console.log(">>> USER SESSION:", user);
-
   return (
     <AuthContext.Provider value={{ user, login, register, logout }}>
       <Routes>
-        <Route path="/adminDashboard" element={<AdminDashboard />} />
-        <Route path="/therapistDashboard" element={<TherapistDashboard />} />
-        <Route path="/patientHome" element={<PatientDashboard />} />
+        <Route path="/login" element={!user ? <AuthScreen /> : <Navigate to="/" replace />} />
+        <Route path="/adminDashboard" element={user ? <AdminDashboard /> : <Navigate to="/login" replace />} />
+        <Route path="/therapistDashboard" element={user ? <TherapistDashboard /> : <Navigate to="/login" replace />} />
+        <Route path="/patientHome" element={user ? <PatientDashboard /> : <Navigate to="/login" replace />} />
         <Route path="/publicHome" element={<PublicHome />} />
-        <Route path="/visitorHome" element={<VisitorHome />} />
-        <Route path="/" element={<LoadingScreen />} />
+        <Route path="/" element={<VisitorHome />} />
       </Routes>
     </AuthContext.Provider>
   );
