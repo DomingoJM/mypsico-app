@@ -91,16 +91,35 @@ const AuthScreen: React.FC = () => {
 
   return (
     <div 
-        className="min-h-screen flex flex-col items-center justify-center p-4 bg-cover bg-center"
-        style={{ background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)" }}
+        className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50 relative overflow-hidden"
     >
-      <div className="absolute inset-0 bg-black/30"></div>
+      {/* Elementos decorativos de fondo */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+        <div className="absolute top-40 right-10 w-72 h-72 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style={{animationDelay: '2s'}}></div>
+        <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style={{animationDelay: '4s'}}></div>
+      </div>
+
       <div className="w-full max-w-md mx-auto z-10">
-        <div className="text-center mb-8">
-          <h1 className="text-5xl font-serif text-white tracking-wider drop-shadow-lg">MyPsico</h1>
-          <p className="text-white/90 mt-2 text-lg drop-shadow-md">Tu espacio para sanar.</p>
+        <div className="text-center mb-8 animate-fade-in">
+          <div className="inline-block mb-4">
+            <img src="/MyPsico.png" alt="MyPsico" className="h-16 mx-auto opacity-90" />
+          </div>
+          <h1 className="text-5xl font-serif text-gray-800 tracking-wide mb-2">MyPsico</h1>
+          <p className="text-gray-600 text-lg font-light">Tu espacio para sanar.</p>
         </div>
-        <div className="bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-2xl transition-all duration-500">
+
+        <style>{`
+          @keyframes fade-in {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .animate-fade-in {
+            animation: fade-in 0.6s ease-out;
+          }
+        `}</style>
+
+        <div className="bg-white/90 backdrop-blur-lg p-8 rounded-3xl shadow-2xl border border-white/50 transition-all duration-500">
             {registrationSuccess ? (
                 <div className="text-center py-8 px-4 transition-all duration-500 animate-fade-in-up">
                     <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-16 w-16 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -128,25 +147,27 @@ const AuthScreen: React.FC = () => {
                 </div>
             ) : (
                 <>
-                    <div className="flex border-b mb-6">
+                    <div className="flex border-b-2 border-gray-100 mb-6">
                         <button
                         onClick={() => setIsLogin(true)}
-                        className={`flex-1 py-2 text-lg font-semibold transition-colors duration-300 ${isLogin ? 'text-brand-primary border-b-2 border-brand-primary' : 'text-slate-500'}`}
+                        className={`flex-1 py-3 text-lg font-semibold transition-all duration-300 relative ${isLogin ? 'text-purple-600' : 'text-gray-500 hover:text-gray-700'}`}
                         >
                         Iniciar Sesión
+                        {isLogin && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-600 to-indigo-600"></div>}
                         </button>
                         <button
                         onClick={() => setIsLogin(false)}
-                        className={`flex-1 py-2 text-lg font-semibold transition-colors duration-300 ${!isLogin ? 'text-brand-primary border-b-2 border-brand-primary' : 'text-slate-500'}`}
+                        className={`flex-1 py-3 text-lg font-semibold transition-all duration-300 relative ${!isLogin ? 'text-purple-600' : 'text-gray-500 hover:text-gray-700'}`}
                         >
                         Registrarse
+                        {!isLogin && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-600 to-indigo-600"></div>}
                         </button>
                     </div>
                     
-                    <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in-up">
+                    <form onSubmit={handleSubmit} className="space-y-5 animate-fade-in-up">
                         {!isLogin && (
                         <div>
-                            <label htmlFor="name" className="block text-brand-text font-semibold mb-2">Nombre</label>
+                            <label htmlFor="name" className="block text-gray-700 font-medium mb-2">Nombre completo</label>
                             <input
                             type="text"
                             id="name"
@@ -154,12 +175,12 @@ const AuthScreen: React.FC = () => {
                             onChange={(e) => setName(e.target.value)}
                             placeholder="Tu nombre completo"
                             required
-                            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary bg-white/70"
+                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent bg-white transition-all"
                             />
                         </div>
                         )}
                         <div>
-                        <label htmlFor="email" className="block text-brand-text font-semibold mb-2">Correo Electrónico</label>
+                        <label htmlFor="email" className="block text-gray-700 font-medium mb-2">Correo Electrónico</label>
                         <input
                             type="email"
                             id="email"
@@ -168,11 +189,11 @@ const AuthScreen: React.FC = () => {
                             placeholder="tu@email.com"
                             required
                             autoComplete="email"
-                            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary bg-white/70"
+                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent bg-white transition-all"
                         />
                         </div>
                         <div>
-                            <label htmlFor="password"className="block text-brand-text font-semibold mb-2">Contraseña</label>
+                            <label htmlFor="password"className="block text-gray-700 font-medium mb-2">Contraseña</label>
                             <div className="relative">
                                 <input
                                     type={showPassword ? 'text' : 'password'}
@@ -182,15 +203,15 @@ const AuthScreen: React.FC = () => {
                                     placeholder="••••••••"
                                     required
                                     minLength={6}
-                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary bg-white/70"
+                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent bg-white transition-all"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-gray-700"
                                     aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                                 >
-                                    {showPassword ? <EyeSlashIcon className="h-6 w-6 text-slate-500" /> : <EyeIcon className="h-6 w-6 text-slate-500" />}
+                                    {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
                                 </button>
                             </div>
                         </div>
@@ -203,22 +224,34 @@ const AuthScreen: React.FC = () => {
                                     type="checkbox"
                                     checked={rememberMe}
                                     onChange={(e) => setRememberMe(e.target.checked)}
-                                    className="h-4 w-4 text-brand-primary focus:ring-brand-secondary border-slate-300 rounded"
+                                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
                                 />
-                                <label htmlFor="remember-me" className="ml-2 block text-sm text-brand-text">
+                                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
                                     Recordarme
                                 </label>
                             </div>
                         )}
 
-                        {error && <p className="text-red-500 text-sm text-center pt-2">{error}</p>}
+                        {error && (
+                            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                                {error}
+                            </div>
+                        )}
                         
                         <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-brand-primary text-white py-3 rounded-lg font-semibold hover:bg-brand-dark transition-colors duration-300 disabled:bg-slate-400 !mt-6"
+                        className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white py-3 rounded-xl font-semibold shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-xl transform hover:scale-[1.02] !mt-6"
                         >
-                        {loading ? 'Cargando...' : (isLogin ? 'Entrar' : 'Crear Cuenta')}
+                        {loading ? (
+                            <span className="flex items-center justify-center gap-2">
+                                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Cargando...
+                            </span>
+                        ) : (isLogin ? 'Entrar' : 'Crear Cuenta')}
                         </button>
                     </form>
                 </>
