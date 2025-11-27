@@ -1,8 +1,13 @@
 import React, { useState, useEffect, createContext } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "./supabase";
 import LoadingScreen from "./shared/LoadingScreen";
-import { AppLogo } from "./shared/AppLogo";
 import AuthScreen from "./auth/AuthScreen";
+import AdminDashboard from "./components/dashboard/admin/AdminDashboard";
+import TherapistDashboard from "./components/dashboard/therapist/TherapistDashboard";
+import PatientDashboard from "./components/dashboard/patient/PatientDashboard";
+import PublicHome from "./pages/PublicHome";
+import VisitorHome from "./pages/VisitorHome";
 
 // Tipo del contexto
 interface AuthContextType {
@@ -14,7 +19,9 @@ interface AuthContextType {
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
-const App: React.FC = () => {
+// Componente interno que usa el hook de navegación
+const AppContent: React.FC = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -91,33 +98,50 @@ const App: React.FC = () => {
     if (!user || isRedirecting) return;
 
     const loadRole = async () => {
+      console.log("🔄 Iniciando redirección para usuario:", user.id);
       setIsRedirecting(true);
-      const { data } = await supabase
+      
+      const { data, error } = await supabase
         .from("profiles")
         .select("role")
         .eq("id", user.id)
         .single();
 
-      // DIRECTO Y SIN ROMANTICISMO 😅
+      if (error) {
+        console.error("❌ Error al cargar rol:", error);
+        setIsRedirecting(false);
+        return;
+      }
+
+      console.log("✅ Rol obtenido:", data?.role);
+
+      // Usar navigate en lugar de window.location.href
       switch (data?.role) {
         case "patient":
-          window.location.href = "/patientHome";
+          console.log("➡️ Redirigiendo a /patientHome");
+          navigate("/patientHome", { replace: true });
           break;
         case "therapist":
-          window.location.href = "/therapistDashboard";
+          console.log("➡️ Redirigiendo a /therapistDashboard");
+          navigate("/therapistDashboard", { replace: true });
           break;
         case "admin":
-          window.location.href = "/adminDashboard";
+          console.log("➡️ Redirigiendo a /adminDashboard");
+          navigate("/adminDashboard", { replace: true });
           break;
         case "visitor":
         default:
-          window.location.href = "/publicHome"; 
+          console.log("➡️ Redirigiendo a /publicHome");
+          navigate("/publicHome", { replace: true }); 
           break;
       }
+      
+      // Resetear el estado después de navegar
+      setTimeout(() => setIsRedirecting(false), 100);
     };
 
     loadRole();
-  }, [user, isRedirecting]);
+  }, [user, navigate]);
 
   // ------------------------ UI ------------------------
   if (initialLoading || isRedirecting) return <LoadingScreen />;
@@ -129,29 +153,29 @@ const App: React.FC = () => {
       </AuthContext.Provider>
     );
   }
-console.log(">>> USER SESSION:", user);
+
+  console.log(">>> USER SESSION:", user);
 
   return (
     <AuthContext.Provider value={{ user, login, register, logout }}>
-      <div className="min-h-screen flex flex-col bg-gray-50">
-        <header className="bg-white shadow-sm border-b">
-          <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <AppLogo className="w-32 h-10" imageUrl="/MyPsico.png" />
-            <button
-              onClick={logout}
-              className="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-            >
-              Cerrar Sesión
-            </button>
-          </div>
-        </header>
-
-        <main className="flex-1 max-w-7xl mx-auto px-4 py-8 w-full">
-          <h1 className="text-3xl font-bold text-gray-800 text-center mb-3">Cargando entorno...</h1>
-          <p className="text-center text-gray-600">Redirigiendo al dashboard correspondiente</p>
-        </main>
-      </div>
+      <Routes>
+        <Route path="/adminDashboard" element={<AdminDashboard />} />
+        <Route path="/therapistDashboard" element={<TherapistDashboard />} />
+        <Route path="/patientHome" element={<PatientDashboard />} />
+        <Route path="/publicHome" element={<PublicHome />} />
+        <Route path="/visitorHome" element={<VisitorHome />} />
+        <Route path="/" element={<LoadingScreen />} />
+      </Routes>
     </AuthContext.Provider>
+  );
+};
+
+// Componente principal con el Router
+const App: React.FC = () => {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
   );
 };
 
