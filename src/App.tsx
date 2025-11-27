@@ -4,7 +4,7 @@ import LoadingScreen from "./shared/LoadingScreen";
 import { AppLogo } from "./shared/AppLogo";
 import AuthScreen from "./auth/AuthScreen";
 
-// Definir el tipo del contexto
+// Tipo del contexto
 interface AuthContextType {
   user: any;
   login: (email: string, password: string) => Promise<void>;
@@ -22,10 +22,9 @@ const App: React.FC = () => {
   // Verificar sesión al cargar
   useEffect(() => {
     checkUser();
-    
-    // Escuchar cambios de autenticación
+
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (_event, session) => {
         setUser(session?.user ?? null);
         setLoading(false);
       }
@@ -46,61 +45,75 @@ const App: React.FC = () => {
       setTimeout(() => {
         setInitialLoading(false);
         setLoading(false);
-      }, 1500);
+      }, 1200);
     }
   };
 
-  // Función de login
+  // ------------------------ LOGIN ------------------------
   const login = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
     setUser(data.user);
   };
 
-  // Función de registro
+  // ------------------------ REGISTRO ------------------------
   const register = async (name: string, email: string, password: string) => {
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
+    const { data: authData, error: authError } = await supabase.auth.signUp({ email, password });
     if (authError) throw authError;
-    
-    if (authData.user) {
-      // Crear perfil en la tabla profiles
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: authData.user.id,
-          name,
-          email,
-          role: 'patient' // rol por defecto
-        });
 
-      if (profileError) {
-        console.error("Error creating profile:", profileError);
-      }
+    if (authData.user) {
+      await supabase.from("profiles").insert({
+        id: authData.user.id,
+        name,
+        email,
+        role: "patient" // default
+      });
     }
 
     return authData;
   };
 
-  // Función de logout
+  // ------------------------ LOGOUT ------------------------
   const logout = async () => {
     await supabase.auth.signOut();
     setUser(null);
   };
 
-  // Pantalla de carga inicial
-  if (initialLoading) {
-    return <LoadingScreen />;
-  }
+  // ------------------------ REDIRECCIÓN POR ROL ------------------------
+  useEffect(() => {
+    if (!user) return;
 
-  // Si no hay usuario, mostrar login
+    const loadRole = async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+      // DIRECTO Y SIN ROMANTICISMO 😅
+      switch (data?.role) {
+        case "patient":
+          window.location.href = "/patientHome";
+          break;
+        case "therapist":
+          window.location.href = "/therapistDashboard";
+          break;
+        case "admin":
+          window.location.href = "/adminDashboard";
+          break;
+        case "visitor":
+        default:
+          window.location.href = "/publicHome"; 
+          break;
+      }
+    };
+
+    loadRole();
+  }, [user]);
+
+  // ------------------------ UI ------------------------
+  if (initialLoading) return <LoadingScreen />;
+
   if (!user) {
     return (
       <AuthContext.Provider value={{ user, login, register, logout }}>
@@ -108,17 +121,14 @@ const App: React.FC = () => {
       </AuthContext.Provider>
     );
   }
+console.log(">>> USER SESSION:", user);
 
-  // Si hay usuario autenticado, mostrar dashboard
   return (
     <AuthContext.Provider value={{ user, login, register, logout }}>
       <div className="min-h-screen flex flex-col bg-gray-50">
-        {/* Header */}
         <header className="bg-white shadow-sm border-b">
           <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <AppLogo className="w-32 h-10" imageUrl="/MyPsico.png" />
-            </div>
+            <AppLogo className="w-32 h-10" imageUrl="/MyPsico.png" />
             <button
               onClick={logout}
               className="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
@@ -128,34 +138,9 @@ const App: React.FC = () => {
           </div>
         </header>
 
-        {/* Contenido principal */}
         <main className="flex-1 max-w-7xl mx-auto px-4 py-8 w-full">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
-              ¡Bienvenido a MyPsico!
-            </h1>
-            <p className="text-gray-600 mb-8">
-              Tu espacio para el crecimiento personal y el bienestar emocional
-            </p>
-            
-            <div className="bg-white p-8 rounded-xl shadow-md max-w-2xl mx-auto">
-              <h2 className="text-xl font-semibold mb-4">Estado de la aplicación:</h2>
-              <div className="space-y-3 text-left">
-                <p className="flex items-center gap-2">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <span>Sistema de autenticación funcionando</span>
-                </p>
-                <p className="flex items-center gap-2">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <span>Usuario: {user.email}</span>
-                </p>
-                <p className="flex items-center gap-2">
-                  <span className="text-yellow-500 text-xl">⚠</span>
-                  <span>Falta implementar: Dashboard de paciente/terapeuta/admin</span>
-                </p>
-              </div>
-            </div>
-          </div>
+          <h1 className="text-3xl font-bold text-gray-800 text-center mb-3">Cargando entorno...</h1>
+          <p className="text-center text-gray-600">Redirigiendo al dashboard correspondiente</p>
         </main>
       </div>
     </AuthContext.Provider>
