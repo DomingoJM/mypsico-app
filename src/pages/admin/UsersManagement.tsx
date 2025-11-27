@@ -47,6 +47,7 @@ export default function UsersManagement() {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
+        .or('status.is.null,status.neq.deleted') // Mostrar solo usuarios activos o sin status
         .order('created_at', { ascending: false });
       
       console.log('📊 Respuesta de Supabase:', { data, error });
