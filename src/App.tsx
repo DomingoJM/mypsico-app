@@ -18,6 +18,7 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   // Verificar sesión al cargar
   useEffect(() => {
@@ -87,9 +88,10 @@ const App: React.FC = () => {
 
   // ------------------------ REDIRECCIÓN POR ROL ------------------------
   useEffect(() => {
-    if (!user) return;
+    if (!user || isRedirecting) return;
 
     const loadRole = async () => {
+      setIsRedirecting(true);
       const { data } = await supabase
         .from("profiles")
         .select("role")
@@ -115,10 +117,10 @@ const App: React.FC = () => {
     };
 
     loadRole();
-  }, [user]);
+  }, [user, isRedirecting]);
 
   // ------------------------ UI ------------------------
-  if (initialLoading) return <LoadingScreen />;
+  if (initialLoading || isRedirecting) return <LoadingScreen />;
 
   if (!user) {
     return (
