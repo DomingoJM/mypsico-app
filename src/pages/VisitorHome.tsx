@@ -139,12 +139,17 @@ export default function VisitorHome() {
             <span className="font-medium">WhatsApp</span>
           </a>
           
-          <button className="flex flex-col items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-2xl p-6 min-w-[140px] transition-all hover:scale-105">
+          <a 
+            href="https://calendar.google.com/calendar/u/0/r/eventedit?text=Cita%20con%20MyPsico&details=Solicito%20agendar%20una%20cita%20para%20acompañamiento%20terapéutico&add=djmpsicologo@gmail.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-col items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-2xl p-6 min-w-[140px] transition-all hover:scale-105"
+          >
             <div className="w-14 h-14 bg-purple-500 rounded-full flex items-center justify-center text-2xl">
               📅
             </div>
             <span className="font-medium">Agendar cita</span>
-          </button>
+          </a>
           
           <button className="flex flex-col items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-2xl p-6 min-w-[140px] transition-all hover:scale-105">
             <div className="w-14 h-14 bg-gray-500 rounded-full flex items-center justify-center text-2xl">

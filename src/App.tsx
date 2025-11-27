@@ -59,7 +59,7 @@ const AppContent: React.FC = () => {
       setTimeout(() => {
         setInitialLoading(false);
         setLoading(false);
-      }, 1200);
+      }, 3500); // 3.5 segundos para que coincida con la animación
     }
   };
 

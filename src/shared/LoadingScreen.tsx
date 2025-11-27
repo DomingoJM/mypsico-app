@@ -5,14 +5,22 @@ const LoadingScreen: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 fixed inset-0 z-50">
       
       <style>{`
-        @keyframes breathe {
-          0%, 100% { 
+        @keyframes breatheAndGrow {
+          0% { 
             transform: scale(1);
             opacity: 0.7;
           }
-          50% { 
+          40% { 
             transform: scale(1.05);
             opacity: 1;
+          }
+          70% {
+            transform: scale(1.05);
+            opacity: 1;
+          }
+          100% { 
+            transform: scale(8);
+            opacity: 0.95;
           }
         }
         @keyframes gentlePulse {
@@ -29,21 +37,26 @@ const LoadingScreen: React.FC = () => {
             transform: translateY(0);
           }
         }
-        .breathe-animation {
-          animation: breathe 3s ease-in-out infinite;
+        @keyframes fadeOut {
+          0% { opacity: 1; }
+          70% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+        .breathe-and-grow {
+          animation: breatheAndGrow 3.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
         .gentle-pulse {
-          animation: gentlePulse 2s ease-in-out infinite;
+          animation: gentlePulse 2s ease-in-out infinite, fadeOut 3.5s ease-out forwards;
         }
         .slide-up {
-          animation: slideUp 0.8s ease-out forwards;
+          animation: slideUp 0.8s ease-out forwards, fadeOut 3.5s ease-out forwards;
         }
       `}</style>
       
       <div className="flex flex-col items-center">
         
-        {/* LOGO con animación de respiración */}
-        <div className="breathe-animation mb-6">
+        {/* LOGO con animación de respiración y crecimiento */}
+        <div className="breathe-and-grow mb-6">
           <img 
             src="/MyPsico.png" 
             alt="MyPsico Logo" 
@@ -62,7 +75,7 @@ const LoadingScreen: React.FC = () => {
         </p>
 
         {/* Línea decorativa */}
-        <div className="h-px w-32 bg-gradient-to-r from-transparent via-purple-300 to-transparent my-4"></div>
+        <div className="h-px w-32 bg-gradient-to-r from-transparent via-purple-300 to-transparent my-4 slide-up" style={{ animationDelay: '0.4s' }}></div>
 
         {/* Indicador de carga orgánico */}
         <div className="flex gap-2 mt-4">
