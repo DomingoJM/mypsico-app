@@ -1,8 +1,11 @@
-import { useAuth } from "../../../../hooks/useAuth";
+import { useContext } from "react";
+import { AuthContext } from "../../../App";
 import { Link } from "react-router-dom";
 
 export default function AdminDashboard() {
-  const { user, logout } = useAuth();
+  const auth = useContext(AuthContext);
+  const user = auth?.user;
+  const logout = auth?.logout;
 
   if (!user) return <p className="text-center mt-10">Cargando...</p>;
 
