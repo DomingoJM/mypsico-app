@@ -43,16 +43,24 @@ export default function UsersManagement() {
   const loadUsers = async () => {
     setLoading(true);
     try {
+      console.log('🔍 Intentando cargar usuarios...');
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .neq('status', 'deleted') // No mostrar usuarios eliminados
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      console.log('📊 Respuesta de Supabase:', { data, error });
+      
+      if (error) {
+        console.error('❌ Error de Supabase:', error);
+        throw error;
+      }
+      
+      console.log('✅ Usuarios cargados:', data?.length);
       setUsers(data || []);
-    } catch (error) {
-      console.error('Error loading users:', error);
+    } catch (error: any) {
+      console.error('❌ Error loading users:', error);
+      console.error('❌ Error completo:', JSON.stringify(error, null, 2));
     } finally {
       setLoading(false);
     }
