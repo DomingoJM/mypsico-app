@@ -127,12 +127,12 @@ const AppContent: React.FC = () => {
         setIsRedirecting(false);
         return;
       }
-      if (data?.role === "therapist" && currentPath.startsWith("/therapist")) {
+      if (data?.role === "terapeuta" && currentPath.startsWith("/therapist")) {
         console.log("✅ Ya estás en una ruta de terapeuta válida:", currentPath);
         setIsRedirecting(false);
         return;
       }
-      if (data?.role === "patient" && currentPath.startsWith("/patient")) {
+      if (data?.role === "paciente" && currentPath.startsWith("/patient")) {
         console.log("✅ Ya estás en una ruta de paciente válida:", currentPath);
         setIsRedirecting(false);
         return;
@@ -147,11 +147,11 @@ const AppContent: React.FC = () => {
 
       // Usar navigate en lugar de window.location.href
       switch (data?.role) {
-        case "patient":
+        case "paciente":
           console.log("➡️ Redirigiendo a /patientHome");
           navigate("/patientHome", { replace: true });
           break;
-        case "therapist":
+        case "terapeuta":
           console.log("➡️ Redirigiendo a /therapistDashboard");
           navigate("/therapistDashboard", { replace: true });
           break;
@@ -159,7 +159,7 @@ const AppContent: React.FC = () => {
           console.log("➡️ Redirigiendo a /adminDashboard");
           navigate("/adminDashboard", { replace: true });
           break;
-        case "visitor":
+        case "visitante":
         default:
           console.log("➡️ Redirigiendo a /publicHome");
           navigate("/publicHome", { replace: true }); 

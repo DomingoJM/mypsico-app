@@ -103,7 +103,10 @@ export default function UsersManagement() {
         return;
       }
 
-      // Crear usuario con signup normal (sin requerir confirmación de email para testing)
+      // Guardar sesión actual antes de crear usuario
+      const { data: currentSession } = await supabase.auth.getSession();
+
+      // Crear usuario con signup normal
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: newUser.email,
         password: newUser.password,
@@ -113,14 +116,12 @@ export default function UsersManagement() {
             name: newUser.name,
             role: newUser.role
           },
-          // Para testing: no enviar email de confirmación
-          // TODO: Cambiar a true en producción
         }
       });
 
       if (authError) throw authError;
 
-      // Crear perfil directamente (incluso antes de confirmar email)
+      // Crear perfil directamente
       if (authData.user) {
         const { error: profileError } = await supabase.from('profiles').insert({
           id: authData.user.id,
@@ -129,13 +130,18 @@ export default function UsersManagement() {
           role: newUser.role,
           status: 'active',
           created_by: currentUser?.id,
-          cv_link: newUser.role === 'therapist' ? newUser.cv_link : null
+          cv_link: newUser.role === 'terapeuta' ? newUser.cv_link : null
         });
 
         if (profileError) throw profileError;
       }
 
-      alert(`✅ ${newUser.role === 'terapeuta' ? 'Terapeuta' : 'Administrador'} creado exitosamente.\n\n📧 Se envió un email de confirmación a ${newUser.email}`);
+      // Restaurar sesión del admin
+      if (currentSession?.session) {
+        await supabase.auth.setSession(currentSession.session);
+      }
+
+      alert(`✅ ${newUser.role === 'terapeuta' ? 'Terapeuta' : 'Administrador'} creado exitosamente`);
       setShowCreateModal(false);
       setNewUser({ name: '', email: '', password: '', role: 'terapeuta', cv_link: '' });
       loadUsers();
