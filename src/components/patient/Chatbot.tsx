@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { geminiService } from '../../services/geminiService';
-import { ChatMessage } from '../../../types';
+import { ChatMessage } from '../../types/types';
 import { CloseIcon, SendIcon, MicrophoneIcon, SpeakerOnIcon, SpeakerOffIcon } from '../../shared/Icons';
 import { AppLogo } from '../../shared/AppLogo';
 import { Chat } from '@google/genai';

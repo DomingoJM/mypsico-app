@@ -1,5 +1,5 @@
 import React from 'react';
-import { ContentItem, ContentType } from '../../../../types';
+import { ContentItem, ContentType } from '../../../types/types';
 import { CloseIcon } from '../../../shared/Icons';
 
 interface ContentPlayerModalProps {

@@ -2,7 +2,7 @@ import React, { useState, useRef, ChangeEvent, useContext } from 'react';
 import * as supabaseService from '../../../services/supabaseService';
 import { AuthContext } from '../../../App';
 import { CloseIcon, PhotoIcon } from '../../../shared/Icons';
-import { User, Role } from '../../../../types';
+import { User, Role } from '../../../types/types';
 
 interface CreatePatientModalProps {
     onClose: () => void;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import { User, Role } from '../../../../types';
+import { User, Role } from '../../../types/types';
 import * as supabaseService from '../../../services/supabaseService';
 import { AuthContext } from '../../../App';
 import CreatePatientModal from './CreatePatientModal';

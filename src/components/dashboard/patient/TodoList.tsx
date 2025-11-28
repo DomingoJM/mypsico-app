@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import { TodoItem } from '../../../../types';
+import { TodoItem } from '../../../types/types';
 import * as supabaseService from '../../../services/supabaseService';
 import { AuthContext } from '../../../App';
 import { TrashIcon, BellIcon, CloseIcon } from '../../../shared/Icons';

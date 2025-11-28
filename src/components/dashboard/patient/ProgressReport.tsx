@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ProgressData } from '../../../../types';
+import { ProgressData } from '../../../types/types';
 import * as supabaseService from '../../../services/supabaseService';
 // @ts-ignore
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { PromotionalItem } from '../../../../types';
+import { PromotionalItem } from '../../../types/types';
 import * as supabaseService from '../../../services/supabaseService';
 import { BookIcon, VideoIcon } from '../../../shared/Icons';
 

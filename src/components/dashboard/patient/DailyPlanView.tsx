@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { ContentItem, ContentType, ActivityLog, User } from '../../../../types';
+import { ContentItem, ContentType, ActivityLog, User } from '../../../types/types';
 import { VideoIcon, AudioIcon, TextIcon, CheckCircleIcon, ShareIcon, CloseIcon, PlayCircleIcon } from '../../../shared/Icons';
 import { AuthContext } from '../../../App';
 import * as supabaseService from '../../../services/supabaseService';

@@ -1,5 +1,5 @@
 import { supabase } from '../supabase';
-import { ContentItem } from '../../types';
+import { ContentItem } from '../types/types';
 import { withTimeout } from './supabaseService';
 
 // Tipos para el contenido diario
