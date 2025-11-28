@@ -4,7 +4,7 @@ export default function PublicHome() {
 
       {/* Header minimal */}
       <header className="flex items-center justify-between px-6 py-4 border-b">
-        <img src="/MyPsico.png" alt="MyPsico" className="h-8 opacity-90" />
+        <img src="/icon-512.png" alt="MyPsico" className="h-8 opacity-90" />
 
         <a href="/Login"
           className="text-sm font-medium hover:text-gray-900 transition">

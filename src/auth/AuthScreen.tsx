@@ -103,7 +103,7 @@ const AuthScreen: React.FC = () => {
       <div className="w-full max-w-md mx-auto z-10">
         <div className="text-center mb-8 animate-fade-in">
           <div className="inline-block mb-4">
-            <img src="/MyPsico.png" alt="MyPsico" className="h-20 mx-auto opacity-90" />
+            <img src="/icon-512.png" alt="MyPsico" className="h-20 mx-auto opacity-90" />
           </div>
           <h1 className="text-5xl font-serif text-gray-800 tracking-wide mb-2">MyPs<span style={{fontSize: '0.75em'}}>Ψ</span>co</h1>
           <p className="text-gray-600 text-lg font-light">Tu espacio para sanar.</p>

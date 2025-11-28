@@ -58,7 +58,7 @@ const LoadingScreen: React.FC = () => {
         {/* LOGO con animación de respiración y crecimiento */}
         <div className="breathe-and-grow mb-6">
           <img 
-            src="/MyPsico.png" 
+            src="/icon-512.png" 
             alt="MyPsico Logo" 
             className="w-32 h-32 drop-shadow-lg"
           />

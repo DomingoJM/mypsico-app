@@ -12,7 +12,7 @@ const Logo: React.FC<LogoProps> = ({ size = 70, text = true, centered = false })
       
       {/* LOGO PNG o SVG */}
       <img
-        src="/MyPsico.png"
+        src="/icon-512.png"
         alt="MyPsico Logo"
         style={{ width: size, height: size }}
         className="opacity-95"
