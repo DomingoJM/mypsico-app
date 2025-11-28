@@ -8,8 +8,10 @@ interface Content {
   description: string;
   type: 'video' | 'audio' | 'article' | 'exercise';
   url: string;
+  thumbnail?: string;
   duration?: number;
   category: string;
+  featured?: boolean;
   created_at: string;
   created_by: string;
   status: 'active' | 'draft' | 'archived';
@@ -27,8 +29,10 @@ export default function ContentManagement() {
     description: '',
     type: 'video' as const,
     url: '',
+    thumbnail: '',
     duration: 0,
     category: 'mindfulness',
+    featured: false,
     status: 'active' as const
   });
 
@@ -97,8 +101,18 @@ export default function ContentManagement() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
+      // Auto-extraer thumbnail de YouTube si es un video y no se proporcionó thumbnail
+      let thumbnail = newContent.thumbnail;
+      if (newContent.type === 'video' && !thumbnail && newContent.url.includes('youtube.com')) {
+        const videoId = extractYouTubeId(newContent.url);
+        if (videoId) {
+          thumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+        }
+      }
+
       const { error } = await supabase.from('contents').insert({
         ...newContent,
+        thumbnail,
         created_by: user?.id
       });
 
@@ -111,8 +125,10 @@ export default function ContentManagement() {
         description: '',
         type: 'video',
         url: '',
+        thumbnail: '',
         duration: 0,
         category: 'mindfulness',
+        featured: false,
         status: 'active'
       });
       loadContents();
@@ -120,6 +136,12 @@ export default function ContentManagement() {
       console.error('Error creating content:', error);
       alert('❌ Error al crear contenido: ' + error.message);
     }
+  };
+
+  const extractYouTubeId = (url: string): string | null => {
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
   };
 
   const handleDeleteContent = async (contentId: string, title: string) => {
@@ -249,10 +271,29 @@ export default function ContentManagement() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredContents.map((content, index) => (
               <div key={content.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all slide-in" style={{ animationDelay: `${index * 0.05}s` }}>
+                {content.thumbnail && (
+                  <div className="h-48 bg-gray-200 overflow-hidden">
+                    <img 
+                      src={content.thumbnail} 
+                      alt={content.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
                 <div className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <span className="text-4xl">{getTypeIcon(content.type)}</span>
-                    {getTypeBadge(content.type)}
+                    <div className="flex gap-2">
+                      {getTypeBadge(content.type)}
+                      {content.featured && (
+                        <span className="px-3 py-1 bg-yellow-100 text-yellow-700 border border-yellow-200 rounded-full text-xs font-semibold">
+                          ⭐ Destacado
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <h3 className="text-lg font-bold text-gray-800 mb-2">{content.title}</h3>
                   <p className="text-gray-600 text-sm mb-4 line-clamp-2">{content.description}</p>
@@ -356,6 +397,17 @@ export default function ContentManagement() {
                   placeholder="https://..."
                   required
                 />
+                <p className="text-xs text-gray-500 mt-1">💡 Para videos de YouTube, se extraerá automáticamente la miniatura</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">URL de imagen miniatura (opcional)</label>
+                <input
+                  type="url"
+                  value={newContent.thumbnail}
+                  onChange={(e) => setNewContent({...newContent, thumbnail: e.target.value})}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400"
+                  placeholder="https://... (para PDFs, artículos, etc.)"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Duración (minutos, opcional)</label>
@@ -366,6 +418,18 @@ export default function ContentManagement() {
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400"
                   min="0"
                 />
+              </div>
+              <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-xl">
+                <input
+                  type="checkbox"
+                  id="featured"
+                  checked={newContent.featured}
+                  onChange={(e) => setNewContent({...newContent, featured: e.target.checked})}
+                  className="w-5 h-5 text-purple-600 rounded focus:ring-2 focus:ring-purple-400"
+                />
+                <label htmlFor="featured" className="text-sm font-medium text-gray-700">
+                  ⭐ Destacar en página de visitantes (máximo 6 contenidos visibles)
+                </label>
               </div>
               <div className="flex gap-3 pt-4">
                 <button
