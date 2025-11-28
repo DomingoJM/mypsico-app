@@ -90,7 +90,7 @@ export default function VisitorHome() {
       {/* Header con logo */}
       <header className="w-full py-6 px-6 flex justify-between items-center bg-white/80 backdrop-blur-sm sticky top-0 z-40 shadow-sm">
         <div className="flex items-center gap-3">
-          <img src="/MyPsico.png" alt="MyPsico" className="h-14 opacity-90" />
+          <img src="/Logoriginal.png" alt="MyPsico" className="h-14 opacity-90" />
           <span className="font-serif text-2xl text-gray-700 tracking-wide">MyPs<span style={{fontSize: '0.75em'}}>Ψ</span>co</span>
         </div>
         <Link 
