@@ -1,7 +1,6 @@
 import { supabase } from '../supabase';
-import { PromoResource, PromoResourceFormData } from '../types';
+import { PromoResource, PromoResourceFormData, ActivityLog } from '../types';
 
-// ✅ EXPORTAR SUPABASE
 export { supabase };
 
 const TIMEOUT = 15000;
@@ -74,10 +73,6 @@ export async function deleteUser(userId: string) {
 }
 
 /* -------------------- CONTENIDOS -------------------- */
-
-export async function createContent(data: any) {
-  return supabase.from('content').insert(data);
-}
 
 export const getContents = async () => {
   const { data, error } = await supabase
@@ -197,6 +192,27 @@ export async function getActivePromotionalItem(): Promise<PromoResource | null> 
   return data || null;
 }
 
+/* -------------------- ACTIVITY LOGS -------------------- */
+
+export async function getActivityLogsForPatient(patientId: string): Promise<ActivityLog[]> {
+  const { data, error } = await supabase
+    .from('activity_logs')
+    .select(`
+      *,
+      content:content_id (
+        id,
+        title,
+        type,
+        url
+      )
+    `)
+    .eq('user_id', patientId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+}
+
 /* -------------------- SUBIDA DE ARCHIVOS -------------------- */
 
 export async function uploadFile(bucket: string, fileName: string, file: File) {
@@ -223,7 +239,7 @@ export async function uploadAppAsset(filePath: string, file: File): Promise<stri
   return urlData.publicUrl;
 }
 
-/* -------------------- LOG FORMAL PARA DEBUG -------------------- */
+/* -------------------- LOG -------------------- */
 
 export function log(...msg: any[]) {
   console.log('📌 [SUPABASE]', ...msg);
