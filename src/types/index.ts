@@ -74,7 +74,7 @@ export interface PromoResourceFormData {
   is_public: boolean;
 }
 
-// ==================== ACTIVITY LOGS ====================
+// Activity Logs
 export interface ActivityLog {
   id: string;
   user_id: string;
@@ -82,9 +82,9 @@ export interface ActivityLog {
   rating?: number;
   reflection?: string;
   created_at: string;
-  content?: Content; // Relación con contenido
+  content?: Content;
 }
 
-// ==================== LEGACY ALIASES (mantener temporalmente) ====================
+// ==================== ALIASES (para compatibilidad) ====================
 export type ContentItem = Content;
 export type Role = UserRole;
