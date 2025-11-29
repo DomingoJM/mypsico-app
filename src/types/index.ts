@@ -34,6 +34,13 @@ export enum NotificationType {
   Message = 'message'
 }
 
+export enum PromoResourceType {
+  Image = 'image',
+  Video = 'video',
+  PDF = 'pdf',
+  Link = 'link'
+}
+
 // ==================== INTERFACES DE USUARIO ====================
 export interface User {
   id: string;
@@ -208,13 +215,23 @@ export interface PromoResource {
   id: string;
   title: string;
   description: string;
-  type: 'image' | 'video' | 'pdf' | 'link';
+  type: PromoResourceType; // ✅ CAMBIADO: ahora usa el enum
   url: string;
   thumbnail_url?: string;
   category: string;
   download_count: number;
   created_at: string;
   created_by: string;
+  is_public: boolean;
+}
+
+export interface PromoResourceFormData {
+  title: string;
+  description: string;
+  type: PromoResourceType;
+  url: string;
+  thumbnail_url?: string;
+  category: string;
   is_public: boolean;
 }
 
@@ -272,27 +289,22 @@ export interface FormState<T> {
 }
 
 // ==================== ALIAS PARA COMPATIBILIDAD ====================
-// Alias para código existente que usa "Role" en lugar de "UserRole"
-export { UserRole as Role };
-// ...existing code...
-
-// ==================== ALIAS PARA COMPATIBILIDAD ====================
-// Alias para código existente que usa "Role" en lugar de "UserRole"
 export { UserRole as Role };
 
 // ==================== TIPOS ADICIONALES PARA COMPONENTES ====================
-// Alias para ContentManagement (usa el mismo tipo que Content)
 export type ContentItem = Content;
 
-// Para subida de contenido con archivo
 export interface ContentUploadData extends ContentFormData {
   file?: File;
 }
 
-// Tipo helper para filtros de contenido
 export interface ContentFilters {
   type?: ContentType;
   category?: string;
   status?: ContentStatus;
   search?: string;
+}
+
+export interface PromoResourceUploadData extends PromoResourceFormData {
+  file?: File;
 }
