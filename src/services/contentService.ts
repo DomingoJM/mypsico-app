@@ -1,4 +1,5 @@
-import { supabase } from '../lib/supabaseClient';
+// ✅ AHORA (línea 2):
+import { supabase } from '../supabase';
 import { 
   Content, 
   ContentFormData, 
