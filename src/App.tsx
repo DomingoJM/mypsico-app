@@ -286,3 +286,58 @@ const App: React.FC = () => {
 };
 
 export default App;
+// ...existing code...
+
+// ==================== FUNCIONES DE CONTENIDO ====================
+export const getContents = async () => {
+  const { data, error } = await supabase
+    .from('content')
+    .select('*')
+    .order('created_at', { ascending: false });
+  
+  if (error) throw error;
+  return data || [];
+};
+
+export const addContent = async (contentData: any) => {
+  const { data, error } = await supabase
+    .from('content')
+    .insert([contentData])
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return data;
+};
+
+export const updateContent = async (id: number, updates: any) => {
+  const { data, error } = await supabase
+    .from('content')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return data;
+};
+
+export const deleteContent = async (id: number) => {
+  const { error } = await supabase
+    .from('content')
+    .delete()
+    .eq('id', id);
+  
+  if (error) throw error;
+};
+
+export const getContentById = async (id: number) => {
+  const { data, error } = await supabase
+    .from('content')
+    .select('*')
+    .eq('id', id)
+    .single();
+  
+  if (error) throw error;
+  return data;
+};
