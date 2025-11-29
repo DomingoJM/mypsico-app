@@ -1,7 +1,7 @@
 import React, { useState, useEffect, createContext } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "./supabase";
-import { User, Role } from "./types";
+import { User, UserRole } from "./types";
 import LoadingScreen from "./shared/LoadingScreen";
 import AuthScreen from "./auth/AuthScreen";
 import AdminDashboard from "./components/dashboard/admin/AdminDashboard";
@@ -22,7 +22,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<{ user: any; session: any }>;
-  simulateRole: (role: Role) => void;
+  simulateRole: (role: UserRole) => void;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -106,13 +106,13 @@ const AppContent: React.FC = () => {
   };
 
   // ==================== MAPEAR ROLES ====================
-  const mapRole = (roleStr: string): Role => {
-    const roleMap: Record<string, Role> = {
-      admin: Role.Admin,
-      terapeuta: Role.Therapist,
-      paciente: Role.Patient,
+  const mapRole = (roleStr: string): UserRole => {
+    const roleMap: Record<string, UserRole> = {
+      admin: UserRole.Admin,
+      terapeuta: UserRole.Therapist,
+      paciente: UserRole.Patient,
     };
-    return roleMap[roleStr] || Role.Patient;
+    return roleMap[roleStr] || UserRole.Patient;
   };
 
   // ==================== LOGIN ====================
@@ -165,8 +165,8 @@ const AppContent: React.FC = () => {
   };
 
   // ==================== SIMULACIÓN DE ROLES (ADMIN) ====================
-  const simulateRole = (role: Role) => {
-    if (!originalUser || originalUser.role !== Role.Admin) {
+  const simulateRole = (role: UserRole) => {
+    if (!originalUser || originalUser.role !== UserRole.Admin) {
       console.warn("⚠️ Solo admins pueden simular roles");
       return;
     }
@@ -182,10 +182,10 @@ const AppContent: React.FC = () => {
     const redirectByRole = () => {
       const currentPath = window.location.pathname;
       
-      const validPaths: Record<Role, string[]> = {
-        [Role.Admin]: ["/admin", "/adminDashboard"],
-        [Role.Therapist]: ["/therapist", "/therapistDashboard"],
-        [Role.Patient]: ["/patient", "/patientHome"],
+      const validPaths: Record<UserRole, string[]> = {
+        [UserRole.Admin]: ["/admin", "/adminDashboard"],
+        [UserRole.Therapist]: ["/therapist", "/therapistDashboard"],
+        [UserRole.Patient]: ["/patient", "/patientHome"],
       };
 
       const isValidPath = validPaths[user.role]?.some(path => 
@@ -204,10 +204,10 @@ const AppContent: React.FC = () => {
 
       setIsRedirecting(true);
 
-      const routes: Record<Role, string> = {
-        [Role.Admin]: "/adminDashboard",
-        [Role.Therapist]: "/therapistDashboard",
-        [Role.Patient]: "/patientHome",
+      const routes: Record<UserRole, string> = {
+        [UserRole.Admin]: "/adminDashboard",
+        [UserRole.Therapist]: "/therapistDashboard",
+        [UserRole.Patient]: "/patientHome",
       };
 
       const targetRoute = routes[user.role] || "/publicHome";
@@ -286,7 +286,6 @@ const App: React.FC = () => {
 };
 
 export default App;
-// ...existing code...
 
 // ==================== FUNCIONES DE CONTENIDO ====================
 export const getContents = async () => {

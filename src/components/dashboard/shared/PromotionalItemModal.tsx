@@ -2,34 +2,42 @@ import React, { useState, ChangeEvent, useContext, useRef } from 'react';
 import * as supabaseService from '../../../services/supabaseService';
 import { AuthContext } from '../../../App';
 import { CloseIcon, PhotoIcon, UploadIcon } from '../../../shared/Icons';
-import { PromoResource, PromoResourceType } from '../../../types'; // ✅ CAMBIADO
+import { PromoResource } from '../../../types';
 
 interface PromotionalItemModalProps {
-    item: PromoResource | null; // ✅ CAMBIADO
+    item: PromoResource | null;
     onClose: () => void;
     onSuccess: () => void;
 }
 
 const thematics = ['depresion', 'ansiedad', 'estres', 'problemas_pareja', 'adicciones', 'tab', 'fobias', 'crecimiento'];
 
+const fileTypes = ['pdf', 'image', 'video', 'other'] as const;
+
 const PromotionalItemModal: React.FC<PromotionalItemModalProps> = ({ item, onClose, onSuccess }) => {
-    const [formData, setFormData] = useState<Partial<PromoResource>>({ // ✅ CAMBIADO
+    const [formData, setFormData] = useState<Partial<PromoResource>>({
         title: item?.title || '',
         description: item?.description || '',
-        url: item?.url || '', // ✅ CAMBIADO: external_link → url
-        type: item?.type || PromoResourceType.Link, // ✅ CAMBIADO: item_type → type, Book → Link
-        category: item?.category || '', // ✅ CAMBIADO: thematic → category
+        file_url: item?.file_url || '',
+        file_type: item?.file_type || 'pdf',
+        is_public: item?.is_public || false,
     });
     const [imageFile, setImageFile] = useState<File | null>(null);
-    const [imagePreview, setImagePreview] = useState<string | null>(item?.thumbnail_url || null); // ✅ CAMBIADO
+    const [imagePreview, setImagePreview] = useState<string | null>(item?.thumbnail_url || null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const auth = useContext(AuthContext);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        const { name, value, type } = e.target;
+        
+        if (type === 'checkbox') {
+            const checked = (e.target as HTMLInputElement).checked;
+            setFormData(prev => ({ ...prev, [name]: checked }));
+        } else {
+            setFormData(prev => ({ ...prev, [name]: value }));
+        }
     };
     
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -48,8 +56,8 @@ const PromotionalItemModal: React.FC<PromotionalItemModalProps> = ({ item, onClo
         e.preventDefault();
         setError(null);
         
-        if (!formData.title || !formData.url || (!imageFile && !item)) { // ✅ CAMBIADO
-            setError("Título, enlace e imagen son obligatorios.");
+        if (!formData.title || !formData.file_url || (!imageFile && !item)) {
+            setError("Título, URL del archivo e imagen son obligatorios.");
             return;
         }
 
@@ -61,7 +69,7 @@ const PromotionalItemModal: React.FC<PromotionalItemModalProps> = ({ item, onClo
         setLoading(true);
 
         try {
-            let imageUrl = item?.thumbnail_url || ''; // ✅ CAMBIADO
+            let imageUrl = item?.thumbnail_url || '';
 
             if (imageFile) {
                 const filePath = `promotional_images/${Date.now()}_${imageFile.name}`;
@@ -70,15 +78,14 @@ const PromotionalItemModal: React.FC<PromotionalItemModalProps> = ({ item, onClo
 
             const dataToSave = {
                 ...formData,
-                thumbnail_url: imageUrl, // ✅ CAMBIADO
-                category: formData.category || undefined, // ✅ CAMBIADO
+                thumbnail_url: imageUrl,
             };
 
             if (item) {
                 await supabaseService.updatePromotionalItem(item.id, dataToSave);
             } else {
                 await supabaseService.addPromotionalItem(
-                    dataToSave as Omit<PromoResource, 'id' | 'created_by' | 'created_at' | 'download_count'>, // ✅ CAMBIADO
+                    dataToSave as Omit<PromoResource, 'id' | 'created_at' | 'download_count'>,
                     auth.user.id
                 );
             }
@@ -90,13 +97,12 @@ const PromotionalItemModal: React.FC<PromotionalItemModalProps> = ({ item, onClo
             setLoading(false);
         }
     };
-    
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-center p-4 animate-fade-in-up">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh]" style={{ animationDuration: '0.3s' }}>
                 <header className="flex items-center justify-between p-4 border-b">
-                    <h2 className="text-xl font-bold text-brand-dark">{item ? 'Editar' : 'Añadir'} Promoción</h2>
+                    <h2 className="text-xl font-bold text-brand-dark">{item ? 'Editar' : 'Añadir'} Recurso Promocional</h2>
                     <button onClick={onClose} className="p-1 rounded-full hover:bg-slate-100">
                         <CloseIcon className="w-6 h-6 text-slate-600" />
                     </button>
@@ -105,8 +111,8 @@ const PromotionalItemModal: React.FC<PromotionalItemModalProps> = ({ item, onClo
                     <main className="p-6 space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Imagen Promocional</label>
-                                 <input
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Imagen Miniatura</label>
+                                <input
                                     type="file"
                                     accept="image/*"
                                     ref={fileInputRef}
@@ -125,7 +131,7 @@ const PromotionalItemModal: React.FC<PromotionalItemModalProps> = ({ item, onClo
                                             <span className="text-sm">Subir imagen</span>
                                         </div>
                                     )}
-                                     <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
                                         <UploadIcon className="w-8 h-8"/>
                                         <p>Cambiar imagen</p>
                                     </div>
@@ -137,28 +143,32 @@ const PromotionalItemModal: React.FC<PromotionalItemModalProps> = ({ item, onClo
                                     <input type="text" name="title" id="title" value={formData.title} onChange={handleChange} required className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary" />
                                 </div>
                                 <div>
-                                    <label htmlFor="type" className="block text-sm font-medium text-slate-700">Tipo</label>
-                                    <select name="type" id="type" value={formData.type} onChange={handleChange} required className="mt-1 block w-full pl-3 pr-10 py-2 border-slate-300 focus:outline-none focus:ring-brand-primary focus:border-brand-primary rounded-md">
-                                        {Object.values(PromoResourceType).map(type => (
-                                            <option key={type} value={type} className="capitalize">{type}</option>
+                                    <label htmlFor="file_type" className="block text-sm font-medium text-slate-700">Tipo de Archivo</label>
+                                    <select name="file_type" id="file_type" value={formData.file_type} onChange={handleChange} required className="mt-1 block w-full pl-3 pr-10 py-2 border-slate-300 focus:outline-none focus:ring-brand-primary focus:border-brand-primary rounded-md">
+                                        {fileTypes.map(type => (
+                                            <option key={type} value={type} className="capitalize">{type === 'pdf' ? 'PDF' : type}</option>
                                         ))}
                                     </select>
                                 </div>
-                                <div>
-                                    <label htmlFor="category" className="block text-sm font-medium text-slate-700">Categoría (Opcional)</label>
-                                    <select name="category" id="category" value={formData.category || ''} onChange={handleChange} className="mt-1 block w-full pl-3 pr-10 py-2 border-slate-300 focus:outline-none focus:ring-brand-primary focus:border-brand-primary rounded-md">
-                                        <option value="">General / Ninguna</option>
-                                        {thematics.map(t => <option key={t} value={t} className="capitalize">{t.replace('_', ' ')}</option>)}
-                                    </select>
+                                <div className="flex items-center">
+                                    <input 
+                                        type="checkbox" 
+                                        name="is_public" 
+                                        id="is_public" 
+                                        checked={formData.is_public || false} 
+                                        onChange={handleChange}
+                                        className="w-4 h-4 text-brand-primary border-slate-300 rounded focus:ring-brand-primary"
+                                    />
+                                    <label htmlFor="is_public" className="ml-2 block text-sm font-medium text-slate-700">Hacer público (visible en home)</label>
                                 </div>
                             </div>
                         </div>
                         <div>
-                            <label htmlFor="url" className="block text-sm font-medium text-slate-700">Enlace Externo (URL)</label>
-                            <input type="url" name="url" id="url" value={formData.url} onChange={handleChange} required placeholder="https://amazon.com/mi-libro" className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary" />
+                            <label htmlFor="file_url" className="block text-sm font-medium text-slate-700">URL del Archivo</label>
+                            <input type="url" name="file_url" id="file_url" value={formData.file_url} onChange={handleChange} required placeholder="https://ejemplo.com/archivo.pdf" className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary" />
                         </div>
                         <div>
-                            <label htmlFor="description" className="block text-sm font-medium text-slate-700">Descripción Corta</label>
+                            <label htmlFor="description" className="block text-sm font-medium text-slate-700">Descripción</label>
                             <textarea name="description" id="description" value={formData.description} onChange={handleChange} rows={3} className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary" />
                         </div>
 

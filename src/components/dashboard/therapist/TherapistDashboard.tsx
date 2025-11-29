@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import UserManagement from '../shared/UserManagement';
 import ContentManagement from '../shared/ContentManagement';
-import { Role, User } from "../../../types"
+import { UserRole, User } from "../../../types";
 import PatientDetailView from './PatientDetailView';
 import PromotionalItemsManagement from '../shared/PromotionalItemsManagement';
 
@@ -24,7 +24,7 @@ const TherapistDashboard: React.FC = () => {
         if (selectedPatient) {
             return <PatientDetailView patient={selectedPatient} onBack={handleBackToList} />;
         }
-        return <UserManagement manageableRole={Role.Patient} onSelectPatient={handleSelectPatient} />;
+        return <UserManagement manageableRole={UserRole.Patient} onSelectPatient={handleSelectPatient} />;
     };
 
     return (
@@ -34,7 +34,7 @@ const TherapistDashboard: React.FC = () => {
                     <button
                         onClick={() => {
                             setActiveTab('patients');
-                            setSelectedPatient(null); // Reset patient view when switching tabs
+                            setSelectedPatient(null);
                         }}
                         className={`${activeTab === 'patients' ? 'border-brand-primary text-brand-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg`}
                     >
@@ -46,7 +46,7 @@ const TherapistDashboard: React.FC = () => {
                     >
                         Gestionar Contenido
                     </button>
-                     <button
+                    <button
                         onClick={() => setActiveTab('promotions')}
                         className={`${activeTab === 'promotions' ? 'border-brand-primary text-brand-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg`}
                     >
@@ -58,7 +58,6 @@ const TherapistDashboard: React.FC = () => {
             {activeTab === 'patients' && renderPatientView()}
             {activeTab === 'content' && <ContentManagement />}
             {activeTab === 'promotions' && <PromotionalItemsManagement />}
-
         </div>
     );
 };
