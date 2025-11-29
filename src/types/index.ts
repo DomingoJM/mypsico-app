@@ -274,3 +274,25 @@ export interface FormState<T> {
 // ==================== ALIAS PARA COMPATIBILIDAD ====================
 // Alias para código existente que usa "Role" en lugar de "UserRole"
 export { UserRole as Role };
+// ...existing code...
+
+// ==================== ALIAS PARA COMPATIBILIDAD ====================
+// Alias para código existente que usa "Role" en lugar de "UserRole"
+export { UserRole as Role };
+
+// ==================== TIPOS ADICIONALES PARA COMPONENTES ====================
+// Alias para ContentManagement (usa el mismo tipo que Content)
+export type ContentItem = Content;
+
+// Para subida de contenido con archivo
+export interface ContentUploadData extends ContentFormData {
+  file?: File;
+}
+
+// Tipo helper para filtros de contenido
+export interface ContentFilters {
+  type?: ContentType;
+  category?: string;
+  status?: ContentStatus;
+  search?: string;
+}
