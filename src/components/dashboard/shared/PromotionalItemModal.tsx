@@ -2,10 +2,10 @@ import React, { useState, ChangeEvent, useContext, useRef } from 'react';
 import * as supabaseService from '../../../services/supabaseService';
 import { AuthContext } from '../../../App';
 import { CloseIcon, PhotoIcon, UploadIcon } from '../../../shared/Icons';
-import { PromotionalItem, PromotionalItemType } from '../../../types';
+import { PromoResource, PromoResourceType } from '../../../types'; // ✅ CAMBIADO
 
 interface PromotionalItemModalProps {
-    item: PromotionalItem | null;
+    item: PromoResource | null; // ✅ CAMBIADO
     onClose: () => void;
     onSuccess: () => void;
 }
@@ -13,15 +13,15 @@ interface PromotionalItemModalProps {
 const thematics = ['depresion', 'ansiedad', 'estres', 'problemas_pareja', 'adicciones', 'tab', 'fobias', 'crecimiento'];
 
 const PromotionalItemModal: React.FC<PromotionalItemModalProps> = ({ item, onClose, onSuccess }) => {
-    const [formData, setFormData] = useState<Partial<PromotionalItem>>({
+    const [formData, setFormData] = useState<Partial<PromoResource>>({ // ✅ CAMBIADO
         title: item?.title || '',
         description: item?.description || '',
-        external_link: item?.external_link || '',
-        item_type: item?.item_type || PromotionalItemType.Book,
-        thematic: item?.thematic || '',
+        url: item?.url || '', // ✅ CAMBIADO: external_link → url
+        type: item?.type || PromoResourceType.Link, // ✅ CAMBIADO: item_type → type, Book → Link
+        category: item?.category || '', // ✅ CAMBIADO: thematic → category
     });
     const [imageFile, setImageFile] = useState<File | null>(null);
-    const [imagePreview, setImagePreview] = useState<string | null>(item?.image_url || null);
+    const [imagePreview, setImagePreview] = useState<string | null>(item?.thumbnail_url || null); // ✅ CAMBIADO
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const auth = useContext(AuthContext);
@@ -48,8 +48,8 @@ const PromotionalItemModal: React.FC<PromotionalItemModalProps> = ({ item, onClo
         e.preventDefault();
         setError(null);
         
-        if (!formData.title || !formData.external_link || (!imageFile && !item)) {
-            setError("Título, enlace externo e imagen son obligatorios.");
+        if (!formData.title || !formData.url || (!imageFile && !item)) { // ✅ CAMBIADO
+            setError("Título, enlace e imagen son obligatorios.");
             return;
         }
 
@@ -61,7 +61,7 @@ const PromotionalItemModal: React.FC<PromotionalItemModalProps> = ({ item, onClo
         setLoading(true);
 
         try {
-            let imageUrl = item?.image_url || '';
+            let imageUrl = item?.thumbnail_url || ''; // ✅ CAMBIADO
 
             if (imageFile) {
                 const filePath = `promotional_images/${Date.now()}_${imageFile.name}`;
@@ -70,14 +70,17 @@ const PromotionalItemModal: React.FC<PromotionalItemModalProps> = ({ item, onClo
 
             const dataToSave = {
                 ...formData,
-                image_url: imageUrl,
-                thematic: formData.thematic || undefined,
+                thumbnail_url: imageUrl, // ✅ CAMBIADO
+                category: formData.category || undefined, // ✅ CAMBIADO
             };
 
-            if (item) { // Editing existing item
+            if (item) {
                 await supabaseService.updatePromotionalItem(item.id, dataToSave);
-            } else { // Creating new item
-                await supabaseService.addPromotionalItem(dataToSave as Omit<PromotionalItem, 'id' | 'author_id'>, auth.user.id);
+            } else {
+                await supabaseService.addPromotionalItem(
+                    dataToSave as Omit<PromoResource, 'id' | 'created_by' | 'created_at' | 'download_count'>, // ✅ CAMBIADO
+                    auth.user.id
+                );
             }
             onSuccess();
         } catch (err: any) {
@@ -134,16 +137,16 @@ const PromotionalItemModal: React.FC<PromotionalItemModalProps> = ({ item, onClo
                                     <input type="text" name="title" id="title" value={formData.title} onChange={handleChange} required className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary" />
                                 </div>
                                 <div>
-                                    <label htmlFor="item_type" className="block text-sm font-medium text-slate-700">Tipo</label>
-                                    <select name="item_type" id="item_type" value={formData.item_type} onChange={handleChange} required className="mt-1 block w-full pl-3 pr-10 py-2 border-slate-300 focus:outline-none focus:ring-brand-primary focus:border-brand-primary rounded-md">
-                                        {Object.values(PromotionalItemType).map(type => (
+                                    <label htmlFor="type" className="block text-sm font-medium text-slate-700">Tipo</label>
+                                    <select name="type" id="type" value={formData.type} onChange={handleChange} required className="mt-1 block w-full pl-3 pr-10 py-2 border-slate-300 focus:outline-none focus:ring-brand-primary focus:border-brand-primary rounded-md">
+                                        {Object.values(PromoResourceType).map(type => (
                                             <option key={type} value={type} className="capitalize">{type}</option>
                                         ))}
                                     </select>
                                 </div>
                                 <div>
-                                    <label htmlFor="thematic" className="block text-sm font-medium text-slate-700">Temática (Opcional)</label>
-                                    <select name="thematic" id="thematic" value={formData.thematic || ''} onChange={handleChange} className="mt-1 block w-full pl-3 pr-10 py-2 border-slate-300 focus:outline-none focus:ring-brand-primary focus:border-brand-primary rounded-md">
+                                    <label htmlFor="category" className="block text-sm font-medium text-slate-700">Categoría (Opcional)</label>
+                                    <select name="category" id="category" value={formData.category || ''} onChange={handleChange} className="mt-1 block w-full pl-3 pr-10 py-2 border-slate-300 focus:outline-none focus:ring-brand-primary focus:border-brand-primary rounded-md">
                                         <option value="">General / Ninguna</option>
                                         {thematics.map(t => <option key={t} value={t} className="capitalize">{t.replace('_', ' ')}</option>)}
                                     </select>
@@ -151,8 +154,8 @@ const PromotionalItemModal: React.FC<PromotionalItemModalProps> = ({ item, onClo
                             </div>
                         </div>
                         <div>
-                            <label htmlFor="external_link" className="block text-sm font-medium text-slate-700">Enlace Externo (URL)</label>
-                            <input type="url" name="external_link" id="external_link" value={formData.external_link} onChange={handleChange} required placeholder="https://amazon.com/mi-libro" className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary" />
+                            <label htmlFor="url" className="block text-sm font-medium text-slate-700">Enlace Externo (URL)</label>
+                            <input type="url" name="url" id="url" value={formData.url} onChange={handleChange} required placeholder="https://amazon.com/mi-libro" className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary" />
                         </div>
                         <div>
                             <label htmlFor="description" className="block text-sm font-medium text-slate-700">Descripción Corta</label>
