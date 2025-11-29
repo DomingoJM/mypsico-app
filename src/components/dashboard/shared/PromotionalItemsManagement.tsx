@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import { PromotionalItem } from '../../../types';
+import { PromoResource } from '../../../types'; // ✅ CAMBIADO: PromotionalItem → PromoResource
 import * as supabaseService from '../../../services/supabaseService';
 import { AuthContext } from '../../../App';
 import PromotionalItemModal from './PromotionalItemModal';
 import { TrashIcon } from '../../../shared/Icons';
 
 const PromotionalItemsManagement: React.FC = () => {
-    const [items, setItems] = useState<PromotionalItem[]>([]);
+    const [items, setItems] = useState<PromoResource[]>([]); // ✅ CAMBIADO
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingItem, setEditingItem] = useState<PromotionalItem | null>(null);
+    const [editingItem, setEditingItem] = useState<PromoResource | null>(null); // ✅ CAMBIADO
     const auth = useContext(AuthContext);
 
     const loadItems = useCallback(async () => {
@@ -43,12 +43,12 @@ const PromotionalItemsManagement: React.FC = () => {
         loadItems();
     };
     
-    const handleEdit = (item: PromotionalItem) => {
+    const handleEdit = (item: PromoResource) => { // ✅ CAMBIADO
         setEditingItem(item);
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (item: PromotionalItem) => {
+    const handleDelete = async (item: PromoResource) => { // ✅ CAMBIADO
         if (window.confirm(`¿Estás seguro de que quieres eliminar "${item.title}"?`)) {
             try {
                 await supabaseService.deletePromotionalItem(item.id);
@@ -65,12 +65,12 @@ const PromotionalItemsManagement: React.FC = () => {
         }
     };
 
-    const handleToggleActive = async (item: PromotionalItem) => {
-        const currentlyActive = item.is_active;
+    const handleToggleActive = async (item: PromoResource) => { // ✅ CAMBIADO
+        const currentlyActive = item.is_public; // ✅ CAMBIADO: is_active → is_public
         // Optimistic UI update
-        setItems(items.map(i => i.id === item.id ? {...i, is_active: !currentlyActive} : {...i, is_active: false}));
+        setItems(items.map(i => i.id === item.id ? {...i, is_public: !currentlyActive} : {...i, is_public: false})); // ✅ CAMBIADO
         try {
-            await supabaseService.updatePromotionalItem(item.id, { is_active: !currentlyActive });
+            await supabaseService.updatePromotionalItem(item.id, { is_public: !currentlyActive }); // ✅ CAMBIADO
             // The service handles deactivating others, so we just reload to be safe
             loadItems();
         } catch (err: unknown) {
@@ -115,7 +115,7 @@ const PromotionalItemsManagement: React.FC = () => {
                     <table className="w-full text-left table-auto">
                         <thead>
                             <tr className="bg-slate-100">
-                                <th className="p-3 font-semibold">Activo</th>
+                                <th className="p-3 font-semibold">Público</th> {/* ✅ CAMBIADO: Activo → Público */}
                                 <th className="p-3 font-semibold">Imagen</th>
                                 <th className="p-3 font-semibold">Título</th>
                                 <th className="p-3 font-semibold">Tipo</th>
@@ -130,17 +130,17 @@ const PromotionalItemsManagement: React.FC = () => {
                                             <input
                                                 type="checkbox"
                                                 className="h-5 w-5 rounded text-brand-secondary focus:ring-brand-secondary cursor-pointer"
-                                                checked={item.is_active}
+                                                checked={item.is_public} // ✅ CAMBIADO
                                                 onChange={() => handleToggleActive(item)}
-                                                title={item.is_active ? "Desactivar de la página principal" : "Mostrar en la página principal"}
+                                                title={item.is_public ? "Desactivar de la página principal" : "Mostrar en la página principal"} // ✅ CAMBIADO
                                             />
                                         </div>
                                     </td>
                                     <td className="p-3">
-                                        <img src={item.image_url} alt={item.title} className="w-24 h-14 object-cover rounded"/>
+                                        <img src={item.thumbnail_url || item.url} alt={item.title} className="w-24 h-14 object-cover rounded"/> {/* ✅ CAMBIADO: image_url → thumbnail_url || url */}
                                     </td>
                                     <td className="p-3 font-semibold">{item.title}</td>
-                                    <td className="p-3 capitalize">{item.item_type}</td>
+                                    <td className="p-3 capitalize">{item.type}</td> {/* ✅ CAMBIADO: item_type → type */}
                                     <td className="p-3 space-x-3">
                                         <button onClick={() => handleEdit(item)} className="text-brand-primary hover:text-brand-dark font-semibold">Editar</button>
                                         <button onClick={() => handleDelete(item)} className="text-red-600 hover:text-red-800 font-semibold inline-flex items-center gap-1">
