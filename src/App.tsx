@@ -1,298 +1,276 @@
-import React, { useState, useEffect, createContext } from "react";
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
-import { supabase } from "./supabase";
-import { User, Role } from "./types";
-import LoadingScreen from "./shared/LoadingScreen";
-import AuthScreen from "./auth/AuthScreen";
-import AdminDashboard from "./components/dashboard/admin/AdminDashboard";
-import TherapistDashboard from "./components/dashboard/therapist/TherapistDashboard";
-import PatientDashboard from "./components/dashboard/patient/PatientDashboard";
-import PublicHome from "./pages/PublicHome";
-import VisitorHome from "./pages/VisitorHome";
-import UsersManagement from "./pages/admin/UsersManagement";
-import ContentManagement from "./pages/admin/ContentManagement";
+// Sistema de tipos unificado para MyPsico
 
-// ==================== TIPOS ====================
-interface AuthContextType {
-  user: User | null;
-  originalUser: User | null; // Para simulación de roles
-  setUser: React.Dispatch<React.SetStateAction<User | null>>;
-  logoUrl: string | null;
-  setLogoUrl: (url: string | null) => void;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<{ user: any; session: any }>;
-  simulateRole: (role: Role) => void;
+// ==================== ENUMS ====================
+export enum UserRole {
+  Admin = 'admin',
+  Therapist = 'therapist',
+  Patient = 'patient'
 }
 
-export const AuthContext = createContext<AuthContextType | null>(null);
+export enum ContentType {
+  Video = 'video',
+  Audio = 'audio',
+  Article = 'article',
+  Exercise = 'exercise',
+  Meditation = 'meditation'
+}
 
-// ==================== COMPONENTE PRINCIPAL ====================
-const AppContent: React.FC = () => {
-  const navigate = useNavigate();
-  
-  // Estados
-  const [user, setUser] = useState<User | null>(null);
-  const [originalUser, setOriginalUser] = useState<User | null>(null);
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
-  const [initialLoading, setInitialLoading] = useState(true);
-  const [isRedirecting, setIsRedirecting] = useState(false);
+export enum ContentStatus {
+  Active = 'active',
+  Draft = 'draft',
+  Archived = 'archived'
+}
 
-  // ==================== INICIALIZACIÓN ====================
-  useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        // 1. Verificar sesión actual
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session?.user) {
-          await loadUserProfile(session.user.id);
-        }
+export enum TaskPriority {
+  Low = 'low',
+  Medium = 'medium',
+  High = 'high'
+}
 
-        // 2. Escuchar cambios de autenticación
-        const { data: authListener } = supabase.auth.onAuthStateChange(
-          async (event, session) => {
-            console.log("🔐 Auth event:", event);
-            
-            if (session?.user) {
-              await loadUserProfile(session.user.id);
-            } else {
-              setUser(null);
-              setOriginalUser(null);
-            }
-          }
-        );
+export enum NotificationType {
+  Reminder = 'reminder',
+  NewContent = 'new_content',
+  TaskAssigned = 'task_assigned',
+  Message = 'message'
+}
 
-        return () => {
-          authListener.subscription.unsubscribe();
-        };
-      } catch (error) {
-        console.error("❌ Error al inicializar auth:", error);
-      } finally {
-        setTimeout(() => setInitialLoading(false), 1000);
-      }
-    };
+// ==================== INTERFACES DE USUARIO ====================
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  spiritual_path?: string;
+  photo_url?: string;
+  created_at: string;
+  last_login?: string;
+  is_active: boolean;
+}
 
-    initializeAuth();
-  }, []);
+export interface UserProfile extends User {
+  phone?: string;
+  birth_date?: string;
+  emergency_contact?: string;
+  notes?: string;
+  therapist_id?: string;
+}
 
-  // ==================== CARGAR PERFIL COMPLETO ====================
-  const loadUserProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .single();
+// ==================== INTERFACES DE CONTENIDO ====================
+export interface Content {
+  id: number;
+  title: string;
+  description: string;
+  type: ContentType;
+  url: string;
+  thumbnail_url?: string;
+  duration?: number;
+  category: string;
+  featured: boolean;
+  created_at: string;
+  created_by: string;
+  status: ContentStatus;
+  tags?: string[];
+  view_count?: number;
+}
 
-      if (error) throw error;
+export interface ContentFormData {
+  title: string;
+  description: string;
+  type: ContentType;
+  url: string;
+  thumbnail_url?: string;
+  duration?: number;
+  category: string;
+  featured: boolean;
+  status: ContentStatus;
+  tags?: string[];
+}
 
-      const userProfile: User = {
-        id: data.id,
-        email: data.email,
-        name: data.name,
-        role: mapRole(data.role),
-        photo_url: data.photo_url,
-        spiritual_path: data.spiritual_path,
-        created_at: data.created_at,
-        is_active: data.status === "active",
-      };
+// ==================== INTERFACES DE TAREAS ====================
+export interface Task {
+  id: string;
+  patient_id: string;
+  therapist_id: string;
+  title: string;
+  description: string;
+  due_date: string;
+  completed: boolean;
+  priority: TaskPriority;
+  created_at: string;
+  completed_at?: string;
+  notes?: string;
+}
 
-      setUser(userProfile);
-      setOriginalUser(userProfile); // Para simulación de roles
-      
-      console.log("✅ Usuario cargado:", userProfile);
-    } catch (error) {
-      console.error("❌ Error al cargar perfil:", error);
-    }
-  };
+export interface TaskFormData {
+  patient_id: string;
+  title: string;
+  description: string;
+  due_date: string;
+  priority: TaskPriority;
+}
 
-  // Mapear roles de español a enum
-  const mapRole = (roleStr: string): Role => {
-    const roleMap: Record<string, Role> = {
-      admin: Role.Admin,
-      terapeuta: Role.Therapist,
-      paciente: Role.Patient,
-    };
-    return roleMap[roleStr] || Role.Patient;
-  };
+// ==================== INTERFACES DE RECORDATORIOS ====================
+export interface Reminder {
+  id: string;
+  user_id: string;
+  title: string;
+  description?: string;
+  datetime: string;
+  repeat?: 'daily' | 'weekly' | 'monthly' | 'none';
+  active: boolean;
+  created_at: string;
+  notification_sent?: boolean;
+}
 
-  // ==================== LOGIN ====================
-  const login = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ 
-      email, 
-      password 
-    });
-    
-    if (error) throw error;
-    
-    if (data.user) {
-      await loadUserProfile(data.user.id);
-    }
-  };
+export interface ReminderFormData {
+  title: string;
+  description?: string;
+  datetime: string;
+  repeat?: 'daily' | 'weekly' | 'monthly' | 'none';
+}
 
-  // ==================== REGISTRO ====================
-  const register = async (name: string, email: string, password: string) => {
-    const { data: authData, error: authError } = await supabase.auth.signUp({ 
-      email, 
-      password 
-    });
-    
-    if (authError) throw authError;
+// ==================== INTERFACES DE CHAT ====================
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+  user_id?: string;
+}
 
-    if (authData.user) {
-      // Crear perfil automáticamente como paciente
-      const { error: profileError } = await supabase.from("profiles").insert({
-        id: authData.user.id,
-        name,
-        email,
-        role: "paciente",
-        status: "active",
-      });
+export interface ChatSession {
+  id: string;
+  user_id: string;
+  messages: ChatMessage[];
+  created_at: string;
+  updated_at: string;
+  title?: string;
+}
 
-      if (profileError) {
-        console.error("❌ Error al crear perfil:", profileError);
-        throw profileError;
-      }
-    }
+// ==================== INTERFACES DE DIARIO ====================
+export interface JournalEntry {
+  id: string;
+  user_id: string;
+  content: string;
+  mood?: 'very_bad' | 'bad' | 'neutral' | 'good' | 'very_good';
+  created_at: string;
+  updated_at: string;
+  tags?: string[];
+  is_private: boolean;
+}
 
-    return authData;
-  };
+export interface JournalFormData {
+  content: string;
+  mood?: 'very_bad' | 'bad' | 'neutral' | 'good' | 'very_good';
+  tags?: string[];
+  is_private: boolean;
+}
 
-  // ==================== LOGOUT ====================
-  const logout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setOriginalUser(null);
-    navigate("/login");
-  };
+// ==================== INTERFACES DE NOTIFICACIONES ====================
+export interface Notification {
+  id: string;
+  user_id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  read: boolean;
+  created_at: string;
+  action_url?: string;
+  metadata?: Record<string, any>;
+}
 
-  // ==================== SIMULACIÓN DE ROLES (ADMIN) ====================
-  const simulateRole = (role: Role) => {
-    if (!originalUser || originalUser.role !== Role.Admin) {
-      console.warn("⚠️ Solo admins pueden simular roles");
-      return;
-    }
+// ==================== INTERFACES DE REPORTES ====================
+export interface ProgressReport {
+  id: string;
+  patient_id: string;
+  therapist_id: string;
+  period_start: string;
+  period_end: string;
+  summary: string;
+  completed_tasks: number;
+  total_tasks: number;
+  mood_average?: number;
+  created_at: string;
+  notes?: string;
+}
 
-    setUser({ ...originalUser, role });
-    console.log("🎭 Simulando rol:", role);
-  };
+export interface AnalyticsData {
+  total_users: number;
+  active_patients: number;
+  total_content: number;
+  popular_content: Content[];
+  user_growth: Array<{ date: string; count: number }>;
+  engagement_rate: number;
+}
 
-  // ==================== REDIRECCIÓN POR ROL ====================
-  useEffect(() => {
-    if (!user || isRedirecting || initialLoading) return;
+// ==================== INTERFACES DE RECURSOS PROMOCIONALES ====================
+export interface PromoResource {
+  id: string;
+  title: string;
+  description: string;
+  type: 'image' | 'video' | 'pdf' | 'link';
+  url: string;
+  thumbnail_url?: string;
+  category: string;
+  download_count: number;
+  created_at: string;
+  created_by: string;
+  is_public: boolean;
+}
 
-    const redirectByRole = () => {
-      const currentPath = window.location.pathname;
-      
-      // Evitar bucles de redirección
-      const validPaths: Record<Role, string[]> = {
-        [Role.Admin]: ["/admin", "/adminDashboard"],
-        [Role.Therapist]: ["/therapist", "/therapistDashboard"],
-        [Role.Patient]: ["/patient", "/patientHome"],
-      };
+// ==================== TYPE GUARDS ====================
+export const isAdmin = (user: User): boolean => user.role === UserRole.Admin;
+export const isTherapist = (user: User): boolean => user.role === UserRole.Therapist;
+export const isPatient = (user: User): boolean => user.role === UserRole.Patient;
 
-      const isValidPath = validPaths[user.role]?.some(path => 
-        currentPath.startsWith(path)
-      );
-
-      if (isValidPath) {
-        console.log("✅ Ruta válida para", user.role);
-        return;
-      }
-
-      // Solo redirigir desde login o root
-      if (currentPath !== "/" && currentPath !== "/login") {
-        console.log("⏭️ No redirigir desde", currentPath);
-        return;
-      }
-
-      setIsRedirecting(true);
-
-      const routes: Record<Role, string> = {
-        [Role.Admin]: "/adminDashboard",
-        [Role.Therapist]: "/therapistDashboard",
-        [Role.Patient]: "/patientHome",
-      };
-
-      const targetRoute = routes[user.role] || "/publicHome";
-      console.log("➡️ Redirigiendo a:", targetRoute);
-      
-      navigate(targetRoute, { replace: true });
-      setTimeout(() => setIsRedirecting(false), 300);
-    };
-
-    redirectByRole();
-  }, [user, navigate, isRedirecting, initialLoading]);
-
-  // ==================== RENDER ====================
-  if (initialLoading || isRedirecting) {
-    return <LoadingScreen />;
-  }
-
-  return (
-    <AuthContext.Provider 
-      value={{ 
-        user, 
-        originalUser,
-        setUser,
-        logoUrl, 
-        setLogoUrl, 
-        login, 
-        register, 
-        logout,
-        simulateRole 
-      }}
-    >
-      <Routes>
-        {/* Público */}
-        <Route path="/" element={<VisitorHome />} />
-        <Route path="/publicHome" element={<PublicHome />} />
-        <Route 
-          path="/login" 
-          element={!user ? <AuthScreen /> : <Navigate to="/" replace />} 
-        />
-
-        {/* Admin */}
-        <Route 
-          path="/adminDashboard" 
-          element={user ? <AdminDashboard /> : <Navigate to="/login" replace />} 
-        />
-        <Route 
-          path="/admin/users" 
-          element={user ? <UsersManagement /> : <Navigate to="/login" replace />} 
-        />
-        <Route 
-          path="/admin/content" 
-          element={user ? <ContentManagement /> : <Navigate to="/login" replace />} 
-        />
-
-        {/* Terapeuta */}
-        <Route 
-          path="/therapistDashboard" 
-          element={user ? <TherapistDashboard /> : <Navigate to="/login" replace />} 
-        />
-
-        {/* Paciente */}
-        <Route 
-          path="/patientHome" 
-          element={user ? <PatientDashboard /> : <Navigate to="/login" replace />} 
-        />
-
-        {/* 404 */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </AuthContext.Provider>
-  );
+// ==================== UTILITY TYPES ====================
+export type ContentWithCreator = Content & {
+  creator_name: string;
+  creator_role: UserRole;
 };
 
-// ==================== WRAPPER CON ROUTER ====================
-const App: React.FC = () => {
-  return (
-    <BrowserRouter>
-      <AppContent />
-    </BrowserRouter>
-  );
+export type TaskWithPatient = Task & {
+  patient_name: string;
+  patient_email: string;
 };
 
-export default App;
+export type NotificationPreferences = {
+  email_enabled: boolean;
+  push_enabled: boolean;
+  task_reminders: boolean;
+  new_content_alerts: boolean;
+  chat_notifications: boolean;
+};
+
+// ==================== API RESPONSE TYPES ====================
+export interface ApiResponse<T> {
+  data?: T;
+  error?: string;
+  message?: string;
+  status: number;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  page_size: number;
+  has_more: boolean;
+}
+
+// ==================== FORM VALIDATION TYPES ====================
+export interface ValidationError {
+  field: string;
+  message: string;
+}
+
+export interface FormState<T> {
+  data: T;
+  errors: ValidationError[];
+  isValid: boolean;
+  isSubmitting: boolean;
+}
+
+// ==================== ALIAS PARA COMPATIBILIDAD ====================
+// Alias para código existente que usa "Role" en lugar de "UserRole"
+export { UserRole as Role };
