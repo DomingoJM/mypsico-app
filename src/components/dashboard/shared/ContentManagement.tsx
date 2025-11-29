@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import { ContentItem, ContentType } from '../../../types';
+import { ContentItem, ContentType, Role } from '../../../types'; // ✅ Agregado Role
 import * as supabaseService from '../../../services/supabaseService';
 import { AuthContext } from '../../../App';
-import ContentUploadModal from './ContentUploadModal'; // Importar el nuevo modal
+import ContentUploadModal from './ContentUploadModal';
 import { CloseIcon } from '../../../shared/Icons';
 
 // New Confirmation Modal Component
@@ -57,7 +57,6 @@ const ContentManagement: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const auth = useContext(AuthContext);
 
-    // State for deletion confirmation
     const [itemToDelete, setItemToDelete] = useState<ContentItem | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -65,7 +64,7 @@ const ContentManagement: React.FC = () => {
         setLoading(true);
         setError(null);
         try {
-            const data = await supabaseService.getContent();
+            const data = await supabaseService.getContents(); // ✅ Cambiado de getContent() a getContents()
             setContent(data);
         } catch (error: unknown) {
             console.error("Failed to load content:", error);
@@ -87,15 +86,13 @@ const ContentManagement: React.FC = () => {
 
     const handleUploadSuccess = () => {
         setIsModalOpen(false);
-        loadContent(); // Recargar el contenido para mostrar el nuevo item
+        loadContent();
     };
 
-    // Opens the confirmation modal
     const handleDeleteRequest = (item: ContentItem) => {
         setItemToDelete(item);
     };
 
-    // Performs the actual deletion
     const handleConfirmDelete = async () => {
         if (!itemToDelete) return;
 
@@ -103,7 +100,6 @@ const ContentManagement: React.FC = () => {
         setError(null);
         try {
             await supabaseService.deleteContent(itemToDelete.id);
-            // Actualizar la UI al instante sin recargar toda la lista desde la BD
             setContent(currentContent => currentContent.filter(item => item.id !== itemToDelete.id));
         } catch (err: any) {
             console.error("Failed to delete content:", err);
@@ -114,12 +110,12 @@ const ContentManagement: React.FC = () => {
             setError(detailedError);
         } finally {
             setIsDeleting(false);
-            setItemToDelete(null); // Close modal
+            setItemToDelete(null);
         }
     };
 
-    // FIX: Use `originalUser` for permission checks to ensure admins can always manage content, even when simulating other roles.
-    const canManageContent = auth?.originalUser?.role === 'admin' || auth?.originalUser?.role === 'terapeuta';
+    // ✅ Usa enums en lugar de strings
+    const canManageContent = auth?.originalUser?.role === Role.Admin || auth?.originalUser?.role === Role.Therapist;
 
     if (loading) return <div>Cargando contenido...</div>;
 
@@ -149,18 +145,18 @@ const ContentManagement: React.FC = () => {
                     <table className="w-full text-left table-auto">
                         <thead>
                             <tr className="bg-slate-100">
-                                <th className="p-3 font-semibold">Día</th>
                                 <th className="p-3 font-semibold">Título</th>
                                 <th className="p-3 font-semibold">Tipo</th>
+                                <th className="p-3 font-semibold">Categoría</th>
                                 <th className="p-3 font-semibold">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             {content.map(item => (
                                 <tr key={item.id} className="border-b hover:bg-slate-50">
-                                    <td className="p-3">{item.day}</td>
                                     <td className="p-3">{item.title}</td>
                                     <td className="p-3 capitalize">{item.type}</td>
+                                    <td className="p-3">{item.category}</td>
                                     <td className="p-3">
                                         <button 
                                             onClick={() => handleDeleteRequest(item)}
