@@ -1,6 +1,8 @@
-// src/lib/supabaseService.ts
 import { supabase } from '../supabase';
 import { PromoResource, PromoResourceFormData } from '../types';
+
+// ✅ EXPORTAR SUPABASE
+export { supabase };
 
 const TIMEOUT = 15000;
 const withTimeout = <T>(promise: Promise<T>, ms = TIMEOUT) =>
@@ -11,7 +13,6 @@ const withTimeout = <T>(promise: Promise<T>, ms = TIMEOUT) =>
 
 /* -------------------- AUTENTICACIÓN -------------------- */
 
-// Crear user con rollback si falla la creación del perfil
 export async function createUser(email: string, password: string, name: string) {
   try {
     const { data: authUser, error: authError } = await withTimeout(
@@ -28,7 +29,7 @@ export async function createUser(email: string, password: string, name: string) 
     });
 
     if (profileError) {
-      await supabase.auth.admin.deleteUser(authUser.user.id); // 🔥 ROLLBACK real
+      await supabase.auth.admin.deleteUser(authUser.user.id);
       throw new Error('⚠ Perfil no se creó — usuario revertido.');
     }
 
@@ -63,12 +64,10 @@ export async function getUserProfile(userId: string) {
   return data;
 }
 
-// Update parcial más limpio
 export async function updateUserProfile(userId: string, updates: Record<string, unknown>) {
   return supabase.from('profiles').update(updates).eq('id', userId);
 }
 
-// Elimina perfil + Auth real (no deja usuarios zombis)
 export async function deleteUser(userId: string) {
   await supabase.from('profiles').delete().eq('id', userId);
   return await supabase.auth.admin.deleteUser(userId);
@@ -163,7 +162,6 @@ export async function updatePromotionalItem(
   id: string,
   updates: Partial<PromoResourceFormData>
 ): Promise<void> {
-  // Si se activa is_public, desactivar todos los demás primero
   if (updates.is_public === true) {
     await supabase
       .from('promo_resources')
@@ -195,7 +193,7 @@ export async function getActivePromotionalItem(): Promise<PromoResource | null> 
     .eq('is_public', true)
     .single();
 
-  if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows
+  if (error && error.code !== 'PGRST116') throw error;
   return data || null;
 }
 
@@ -208,7 +206,6 @@ export async function uploadFile(bucket: string, fileName: string, file: File) {
   return supabase.storage.from(bucket).getPublicUrl(fileName).data.publicUrl;
 }
 
-// Función específica para activos de la app (imágenes promocionales, thumbnails, etc.)
 export async function uploadAppAsset(filePath: string, file: File): Promise<string> {
   const { data, error } = await supabase.storage
     .from('app-assets')
