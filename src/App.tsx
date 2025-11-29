@@ -1,6 +1,7 @@
 import React, { useState, useEffect, createContext } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "./supabase";
+import { User, Role } from "./types";
 import LoadingScreen from "./shared/LoadingScreen";
 import AuthScreen from "./auth/AuthScreen";
 import AdminDashboard from "./components/dashboard/admin/AdminDashboard";
@@ -11,189 +12,281 @@ import VisitorHome from "./pages/VisitorHome";
 import UsersManagement from "./pages/admin/UsersManagement";
 import ContentManagement from "./pages/admin/ContentManagement";
 
-// Tipo del contexto
+// ==================== TIPOS ====================
 interface AuthContextType {
-  user: any;
+  user: User | null;
+  originalUser: User | null; // Para simulación de roles
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  logoUrl: string | null;
+  setLogoUrl: (url: string | null) => void;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<any>;
   logout: () => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<{ user: any; session: any }>;
+  simulateRole: (role: Role) => void;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
-// Componente interno que usa el hook de navegación
+// ==================== COMPONENTE PRINCIPAL ====================
 const AppContent: React.FC = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  
+  // Estados
+  const [user, setUser] = useState<User | null>(null);
+  const [originalUser, setOriginalUser] = useState<User | null>(null);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [initialLoading, setInitialLoading] = useState(true);
   const [isRedirecting, setIsRedirecting] = useState(false);
 
-  // Verificar sesión al cargar
+  // ==================== INICIALIZACIÓN ====================
   useEffect(() => {
-    checkUser();
-// EXPOSE TEMPORAL PARA DEBUG
-// ❗ luego lo quitamos
-// @ts-ignore
-  window.supabase = supabase;
-  // @ts-ignore
-  window.supabase = supabase;
+    const initializeAuth = async () => {
+      try {
+        // 1. Verificar sesión actual
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          await loadUserProfile(session.user.id);
+        }
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setUser(session?.user ?? null);
-        setLoading(false);
+        // 2. Escuchar cambios de autenticación
+        const { data: authListener } = supabase.auth.onAuthStateChange(
+          async (event, session) => {
+            console.log("🔐 Auth event:", event);
+            
+            if (session?.user) {
+              await loadUserProfile(session.user.id);
+            } else {
+              setUser(null);
+              setOriginalUser(null);
+            }
+          }
+        );
+
+        return () => {
+          authListener.subscription.unsubscribe();
+        };
+      } catch (error) {
+        console.error("❌ Error al inicializar auth:", error);
+      } finally {
+        setTimeout(() => setInitialLoading(false), 1000);
       }
-    );
-
-    return () => {
-      authListener.subscription.unsubscribe();
     };
+
+    initializeAuth();
   }, []);
 
-  const checkUser = async () => {
+  // ==================== CARGAR PERFIL COMPLETO ====================
+  const loadUserProfile = async (userId: string) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
+
+      if (error) throw error;
+
+      const userProfile: User = {
+        id: data.id,
+        email: data.email,
+        name: data.name,
+        role: mapRole(data.role),
+        photo_url: data.photo_url,
+        spiritual_path: data.spiritual_path,
+        created_at: data.created_at,
+        is_active: data.status === "active",
+      };
+
+      setUser(userProfile);
+      setOriginalUser(userProfile); // Para simulación de roles
+      
+      console.log("✅ Usuario cargado:", userProfile);
     } catch (error) {
-      console.error("Error checking user:", error);
-    } finally {
-      setTimeout(() => {
-        setInitialLoading(false);
-        setLoading(false);
-      }, 3500); // 3.5 segundos para que coincida con la animación
+      console.error("❌ Error al cargar perfil:", error);
     }
   };
 
-  // ------------------------ LOGIN ------------------------
-  const login = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
-    setUser(data.user);
+  // Mapear roles de español a enum
+  const mapRole = (roleStr: string): Role => {
+    const roleMap: Record<string, Role> = {
+      admin: Role.Admin,
+      terapeuta: Role.Therapist,
+      paciente: Role.Patient,
+    };
+    return roleMap[roleStr] || Role.Patient;
   };
 
-  // ------------------------ REGISTRO ------------------------
+  // ==================== LOGIN ====================
+  const login = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({ 
+      email, 
+      password 
+    });
+    
+    if (error) throw error;
+    
+    if (data.user) {
+      await loadUserProfile(data.user.id);
+    }
+  };
+
+  // ==================== REGISTRO ====================
   const register = async (name: string, email: string, password: string) => {
-    const { data: authData, error: authError } = await supabase.auth.signUp({ email, password });
+    const { data: authData, error: authError } = await supabase.auth.signUp({ 
+      email, 
+      password 
+    });
+    
     if (authError) throw authError;
 
     if (authData.user) {
-      // Todos los registros públicos son automáticamente pacientes
-      await supabase.from("profiles").insert({
+      // Crear perfil automáticamente como paciente
+      const { error: profileError } = await supabase.from("profiles").insert({
         id: authData.user.id,
         name,
         email,
-        role: "paciente", // Auto-asignado (en español)
-        status: "active"
+        role: "paciente",
+        status: "active",
       });
+
+      if (profileError) {
+        console.error("❌ Error al crear perfil:", profileError);
+        throw profileError;
+      }
     }
 
     return authData;
   };
 
-  // ------------------------ LOGOUT ------------------------
+  // ==================== LOGOUT ====================
   const logout = async () => {
     await supabase.auth.signOut();
     setUser(null);
+    setOriginalUser(null);
+    navigate("/login");
   };
 
-  // ------------------------ REDIRECCIÓN POR ROL ------------------------
+  // ==================== SIMULACIÓN DE ROLES (ADMIN) ====================
+  const simulateRole = (role: Role) => {
+    if (!originalUser || originalUser.role !== Role.Admin) {
+      console.warn("⚠️ Solo admins pueden simular roles");
+      return;
+    }
+
+    setUser({ ...originalUser, role });
+    console.log("🎭 Simulando rol:", role);
+  };
+
+  // ==================== REDIRECCIÓN POR ROL ====================
   useEffect(() => {
-    if (!user || isRedirecting) return;
+    if (!user || isRedirecting || initialLoading) return;
 
-    const loadRole = async () => {
-      console.log("🔄 Iniciando redirección para usuario:", user.id);
-      setIsRedirecting(true);
-      
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .single();
-
-      if (error) {
-        console.error("❌ Error al cargar rol:", error);
-        setIsRedirecting(false);
-        return;
-      }
-
-      console.log("✅ Rol obtenido:", data?.role);
-
-      // Obtener la ruta actual
+    const redirectByRole = () => {
       const currentPath = window.location.pathname;
       
-      // No redirigir si ya estamos en una ruta válida para el rol
-      if (data?.role === "admin" && currentPath.startsWith("/admin")) {
-        console.log("✅ Ya estás en una ruta de admin válida:", currentPath);
-        setIsRedirecting(false);
-        return;
-      }
-      if (data?.role === "terapeuta" && currentPath.startsWith("/therapist")) {
-        console.log("✅ Ya estás en una ruta de terapeuta válida:", currentPath);
-        setIsRedirecting(false);
-        return;
-      }
-      if (data?.role === "paciente" && currentPath.startsWith("/patient")) {
-        console.log("✅ Ya estás en una ruta de paciente válida:", currentPath);
-        setIsRedirecting(false);
+      // Evitar bucles de redirección
+      const validPaths: Record<Role, string[]> = {
+        [Role.Admin]: ["/admin", "/adminDashboard"],
+        [Role.Therapist]: ["/therapist", "/therapistDashboard"],
+        [Role.Patient]: ["/patient", "/patientHome"],
+      };
+
+      const isValidPath = validPaths[user.role]?.some(path => 
+        currentPath.startsWith(path)
+      );
+
+      if (isValidPath) {
+        console.log("✅ Ruta válida para", user.role);
         return;
       }
 
-      // Solo redirigir si estamos en root (/) o login
+      // Solo redirigir desde login o root
       if (currentPath !== "/" && currentPath !== "/login") {
-        console.log("✅ Ya estás en una ruta específica, no se redirige");
-        setIsRedirecting(false);
+        console.log("⏭️ No redirigir desde", currentPath);
         return;
       }
 
-      // Usar navigate en lugar de window.location.href
-      switch (data?.role) {
-        case "paciente":
-          console.log("➡️ Redirigiendo a /patientHome");
-          navigate("/patientHome", { replace: true });
-          break;
-        case "terapeuta":
-          console.log("➡️ Redirigiendo a /therapistDashboard");
-          navigate("/therapistDashboard", { replace: true });
-          break;
-        case "admin":
-          console.log("➡️ Redirigiendo a /adminDashboard");
-          navigate("/adminDashboard", { replace: true });
-          break;
-        case "visitante":
-        default:
-          console.log("➡️ Redirigiendo a /publicHome");
-          navigate("/publicHome", { replace: true }); 
-          break;
-      }
+      setIsRedirecting(true);
+
+      const routes: Record<Role, string> = {
+        [Role.Admin]: "/adminDashboard",
+        [Role.Therapist]: "/therapistDashboard",
+        [Role.Patient]: "/patientHome",
+      };
+
+      const targetRoute = routes[user.role] || "/publicHome";
+      console.log("➡️ Redirigiendo a:", targetRoute);
       
-      // Resetear el estado después de navegar
-      setTimeout(() => setIsRedirecting(false), 100);
+      navigate(targetRoute, { replace: true });
+      setTimeout(() => setIsRedirecting(false), 300);
     };
 
-    loadRole();
-  }, [user, navigate]);
+    redirectByRole();
+  }, [user, navigate, isRedirecting, initialLoading]);
 
-  // ------------------------ UI ------------------------
-  if (initialLoading || isRedirecting) return <LoadingScreen />;
+  // ==================== RENDER ====================
+  if (initialLoading || isRedirecting) {
+    return <LoadingScreen />;
+  }
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout }}>
+    <AuthContext.Provider 
+      value={{ 
+        user, 
+        originalUser,
+        setUser,
+        logoUrl, 
+        setLogoUrl, 
+        login, 
+        register, 
+        logout,
+        simulateRole 
+      }}
+    >
       <Routes>
-        <Route path="/login" element={!user ? <AuthScreen /> : <Navigate to="/" replace />} />
-        <Route path="/adminDashboard" element={user ? <AdminDashboard /> : <Navigate to="/login" replace />} />
-        <Route path="/admin/users" element={user ? <UsersManagement /> : <Navigate to="/login" replace />} />
-        <Route path="/admin/content" element={user ? <ContentManagement /> : <Navigate to="/login" replace />} />
-        <Route path="/therapistDashboard" element={user ? <TherapistDashboard /> : <Navigate to="/login" replace />} />
-        <Route path="/patientHome" element={user ? <PatientDashboard /> : <Navigate to="/login" replace />} />
-        <Route path="/publicHome" element={<PublicHome />} />
+        {/* Público */}
         <Route path="/" element={<VisitorHome />} />
+        <Route path="/publicHome" element={<PublicHome />} />
+        <Route 
+          path="/login" 
+          element={!user ? <AuthScreen /> : <Navigate to="/" replace />} 
+        />
+
+        {/* Admin */}
+        <Route 
+          path="/adminDashboard" 
+          element={user ? <AdminDashboard /> : <Navigate to="/login" replace />} 
+        />
+        <Route 
+          path="/admin/users" 
+          element={user ? <UsersManagement /> : <Navigate to="/login" replace />} 
+        />
+        <Route 
+          path="/admin/content" 
+          element={user ? <ContentManagement /> : <Navigate to="/login" replace />} 
+        />
+
+        {/* Terapeuta */}
+        <Route 
+          path="/therapistDashboard" 
+          element={user ? <TherapistDashboard /> : <Navigate to="/login" replace />} 
+        />
+
+        {/* Paciente */}
+        <Route 
+          path="/patientHome" 
+          element={user ? <PatientDashboard /> : <Navigate to="/login" replace />} 
+        />
+
+        {/* 404 */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AuthContext.Provider>
   );
 };
 
-// Componente principal con el Router
+// ==================== WRAPPER CON ROUTER ====================
 const App: React.FC = () => {
   return (
     <BrowserRouter>

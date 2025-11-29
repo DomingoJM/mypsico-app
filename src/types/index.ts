@@ -270,3 +270,21 @@ export interface FormState<T> {
   isValid: boolean;
   isSubmitting: boolean;
 }
+// ...existing code...
+
+// ==================== FORM VALIDATION TYPES ====================
+export interface ValidationError {
+  field: string;
+  message: string;
+}
+
+export interface FormState<T> {
+  data: T;
+  errors: ValidationError[];
+  isValid: boolean;
+  isSubmitting: boolean;
+}
+
+// ==================== ALIAS PARA COMPATIBILIDAD ====================
+// Alias para código existente que usa "Role" en lugar de "UserRole"
+export { UserRole as Role };
