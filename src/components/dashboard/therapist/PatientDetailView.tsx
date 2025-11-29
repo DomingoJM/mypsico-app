@@ -51,8 +51,23 @@ const PatientDetailView: React.FC<PatientDetailViewProps> = ({ patient, onBack }
             setLoading(true);
             setError('');
             try {
-                const data = await supabaseService.getActivityLogsForPatient(patient.id);
-                setLogs(data);
+                // ✅ IMPLEMENTACIÓN TEMPORAL - Consulta directa hasta crear la función
+                const { data, error } = await supabaseService.supabase
+                    .from('activity_logs')
+                    .select(`
+                        *,
+                        content:content_id (
+                            id,
+                            title,
+                            type,
+                            url
+                        )
+                    `)
+                    .eq('user_id', patient.id)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                setLogs(data || []);
             } catch (err) {
                 console.error("Failed to fetch activity logs:", err);
                 setError("No se pudieron cargar los registros de actividad.");
@@ -79,22 +94,30 @@ const PatientDetailView: React.FC<PatientDetailViewProps> = ({ patient, onBack }
                  <div className="pt-2">
                     <h2 className="text-3xl font-bold text-brand-dark">{patient.name}</h2>
                     <p className="text-slate-500 text-lg">{patient.email}</p>
-                     {patient.dsm_v_diagnosis && (
-                        <p className="mt-2 text-md font-semibold text-brand-primary bg-brand-primary/10 px-3 py-1 rounded-full inline-block">{patient.dsm_v_diagnosis}</p>
+                     {patient.spiritual_path && (
+                        <p className="mt-2 text-md font-semibold text-brand-primary bg-brand-primary/10 px-3 py-1 rounded-full inline-block">
+                            {patient.spiritual_path}
+                        </p>
                      )}
                  </div>
             </div>
 
-            {/* Clinical Information */}
+            {/* Patient Information */}
             <div className="mb-8">
-                <h3 className="text-xl font-semibold text-brand-dark mb-4 border-b pb-2">Información Clínica</h3>
+                <h3 className="text-xl font-semibold text-brand-dark mb-4 border-b pb-2">Información del Paciente</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <InfoCard title="Historia Familiar">{patient.family_history || 'No especificada.'}</InfoCard>
-                    <InfoCard title="Figuras Significativas">{patient.significant_figures || 'No especificadas.'}</InfoCard>
-                    <InfoCard title="Eventos Traumáticos">{patient.traumatic_events || 'No especificados.'}</InfoCard>
-                    <InfoCard title="Seguimiento y Control">{patient.follow_up_and_control || 'No especificado.'}</InfoCard>
-                    <InfoCard title="Plan de Tratamiento">{patient.treatment_plan || 'No especificado.'}</InfoCard>
+                    {patient.spiritual_path && (
+                        <InfoCard title="Senda Espiritual">{patient.spiritual_path}</InfoCard>
+                    )}
+                    {patient.bio && (
+                        <InfoCard title="Biografía">{patient.bio}</InfoCard>
+                    )}
                 </div>
+                {!patient.spiritual_path && !patient.bio && (
+                    <p className="text-center text-slate-500 py-4 bg-slate-50 rounded-lg">
+                        No hay información adicional disponible para este paciente.
+                    </p>
+                )}
             </div>
 
             {/* Activity Logs */}

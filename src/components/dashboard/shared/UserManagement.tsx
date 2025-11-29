@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import { User, Role } from '../../../types';
+import { User, UserRole } from '../../../types'; // ✅ CAMBIADO: Role → UserRole
 import * as supabaseService from '../../../services/supabaseService';
 import { AuthContext } from '../../../App';
 import CreatePatientModal from './CreatePatientModal';
 import { CloseIcon } from '../../../shared/Icons';
 
 interface UserManagementProps {
-    manageableRole: Role.Admin | Role.Patient;
+    manageableRole: UserRole.Admin | UserRole.Patient; // ✅ CAMBIADO
     onSelectPatient?: (patient: User) => void;
 }
 
@@ -71,13 +71,25 @@ const UserManagement: React.FC<UserManagementProps> = ({ manageableRole, onSelec
         setLoading(true);
         setError(null);
         try {
-            let data;
-            if (manageableRole === Role.Admin) {
-                data = await supabaseService.getUsers();
-            } else if (auth?.user?.id) {
-                data = await supabaseService.getPatientsForTherapist(auth.user.id);
+            // ✅ IMPLEMENTACIÓN TEMPORAL - Reemplazar con funciones reales cuando existan
+            const { data, error } = await supabaseService.supabase
+                .from('profiles')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            let filteredData = data || [];
+            
+            // Si es Admin, mostrar todos; si es Therapist, solo sus pacientes
+            if (manageableRole === UserRole.Patient && auth?.user?.id) { // ✅ CAMBIADO
+                // Filtrar solo pacientes asignados al terapeuta actual
+                filteredData = filteredData.filter(
+                    user => user.role === UserRole.Patient && user.therapist_id === auth.user.id // ✅ CAMBIADO
+                );
             }
-            setUsers(data || []);
+
+            setUsers(filteredData);
         } catch (error: unknown) {
             console.error("Failed to load users:", error);
             let errorMessage = "No se pudieron cargar los usuarios.";
@@ -131,7 +143,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ manageableRole, onSelec
 
     if (loading) return <div>Cargando usuarios...</div>;
 
-    const isTherapistView = manageableRole === Role.Patient;
+    const isTherapistView = manageableRole === UserRole.Patient; // ✅ CAMBIADO
     const buttonText = isTherapistView ? 'Registrar Paciente' : 'Crear Nuevo Usuario';
 
     return (
@@ -139,7 +151,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ manageableRole, onSelec
             <div className="bg-white p-6 rounded-lg shadow-md">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-2xl font-bold text-brand-dark">
-                        {manageableRole === Role.Admin ? 'Todos los Usuarios' : 'Mis Pacientes'}
+                        {manageableRole === UserRole.Admin ? 'Todos los Usuarios' : 'Mis Pacientes'} {/* ✅ CAMBIADO */}
                     </h2>
                      <button
                         onClick={() => setIsCreateModalOpen(true)}
@@ -166,7 +178,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ manageableRole, onSelec
                                 <th className="p-3 font-semibold">Nombre</th>
                                 <th className="p-3 font-semibold">Email</th>
                                 <th className="p-3 font-semibold">
-                                    {isTherapistView ? 'Condición Primaria' : 'Rol'}
+                                    {isTherapistView ? 'Senda Espiritual' : 'Rol'}
                                 </th>
                                 <th className="p-3 font-semibold">Acciones</th>
                             </tr>
@@ -180,7 +192,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ manageableRole, onSelec
                                     </td>
                                     <td className="p-3">{user.email}</td>
                                     <td className="p-3 capitalize">
-                                        {isTherapistView ? (user.primary_condition || 'No especificada') : user.role}
+                                        {isTherapistView ? (user.spiritual_path || 'No especificada') : user.role} {/* ✅ CAMBIADO */}
                                     </td>
                                     <td className="p-3 space-x-4">
                                         {isTherapistView && onSelectPatient && (
@@ -191,7 +203,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ manageableRole, onSelec
                                                 Ver Reporte
                                             </button>
                                         )}
-                                        {auth?.originalUser?.role === Role.Admin && (
+                                        {auth?.originalUser?.role === UserRole.Admin && ( // ✅ CAMBIADO
                                             <button 
                                               onClick={() => handleDeleteRequest(user)}
                                               disabled={auth.user?.id === user.id}
