@@ -1,5 +1,6 @@
 // src/lib/supabaseService.ts
 import { supabase } from '../supabase';
+import { PromoResource, PromoResourceFormData } from '../types';
 
 const TIMEOUT = 15000;
 const withTimeout = <T>(promise: Promise<T>, ms = TIMEOUT) =>
@@ -76,34 +77,9 @@ export async function deleteUser(userId: string) {
 /* -------------------- CONTENIDOS -------------------- */
 
 export async function createContent(data: any) {
-  return supabase.from('contents').insert(data);
+  return supabase.from('content').insert(data);
 }
 
-export async function getContents() {
-  return supabase.from('contents').select('*').order('created_at', { ascending: false });
-}
-
-export async function deleteContent(id: string) {
-  return supabase.from('contents').delete().eq('id', id);
-}
-
-/* -------------------- SUBIDA DE ARCHIVOS -------------------- */
-
-export async function uploadFile(bucket: string, fileName: string, file: File) {
-  const { data, error } = await supabase.storage.from(bucket).upload(fileName, file);
-
-  if (error) throw new Error('Fallo subiendo archivo.');
-  return supabase.storage.from(bucket).getPublicUrl(fileName).data.publicUrl;
-}
-
-/* -------------------- LOG FORMAL PARA DEBUG -------------------- */
-
-export function log(...msg: any[]) {
-  console.log('📌 [SUPABASE]', ...msg);
-}
-// ...existing code...
-
-// ==================== FUNCIONES DE CONTENIDO ====================
 export const getContents = async () => {
   const { data, error } = await supabase
     .from('content')
@@ -156,3 +132,102 @@ export const getContentById = async (id: number) => {
   if (error) throw error;
   return data;
 };
+
+/* -------------------- RECURSOS PROMOCIONALES -------------------- */
+
+export async function getPromotionalItems(): Promise<PromoResource[]> {
+  const { data, error } = await supabase
+    .from('promo_resources')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+}
+
+export async function addPromotionalItem(
+  itemData: Omit<PromoResource, 'id' | 'created_at' | 'download_count'>,
+  createdBy: string
+): Promise<PromoResource> {
+  const { data, error } = await supabase
+    .from('promo_resources')
+    .insert([{ ...itemData, created_by: createdBy, download_count: 0 }])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function updatePromotionalItem(
+  id: string,
+  updates: Partial<PromoResourceFormData>
+): Promise<void> {
+  // Si se activa is_public, desactivar todos los demás primero
+  if (updates.is_public === true) {
+    await supabase
+      .from('promo_resources')
+      .update({ is_public: false })
+      .neq('id', id);
+  }
+
+  const { error } = await supabase
+    .from('promo_resources')
+    .update(updates)
+    .eq('id', id);
+
+  if (error) throw error;
+}
+
+export async function deletePromotionalItem(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('promo_resources')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+}
+
+export async function getActivePromotionalItem(): Promise<PromoResource | null> {
+  const { data, error } = await supabase
+    .from('promo_resources')
+    .select('*')
+    .eq('is_public', true)
+    .single();
+
+  if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows
+  return data || null;
+}
+
+/* -------------------- SUBIDA DE ARCHIVOS -------------------- */
+
+export async function uploadFile(bucket: string, fileName: string, file: File) {
+  const { data, error } = await supabase.storage.from(bucket).upload(fileName, file);
+
+  if (error) throw new Error('Fallo subiendo archivo.');
+  return supabase.storage.from(bucket).getPublicUrl(fileName).data.publicUrl;
+}
+
+// Función específica para activos de la app (imágenes promocionales, thumbnails, etc.)
+export async function uploadAppAsset(filePath: string, file: File): Promise<string> {
+  const { data, error } = await supabase.storage
+    .from('app-assets')
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false
+    });
+
+  if (error) throw new Error(`Error subiendo archivo: ${error.message}`);
+
+  const { data: urlData } = supabase.storage
+    .from('app-assets')
+    .getPublicUrl(filePath);
+
+  return urlData.publicUrl;
+}
+
+/* -------------------- LOG FORMAL PARA DEBUG -------------------- */
+
+export function log(...msg: any[]) {
+  console.log('📌 [SUPABASE]', ...msg);
+}
