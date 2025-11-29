@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, ActivityLog } from '../../../types/types';
+import { User, ActivityLog } from '../../../types';
 import * as supabaseService from '../../../services/supabaseService';
 
 interface PatientDetailViewProps {

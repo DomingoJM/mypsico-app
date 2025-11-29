@@ -7,7 +7,7 @@
 import React, { useContext, useState, useRef } from 'react';
 import { AuthContext } from '../../App';
 import { AppLogo } from '../../shared/AppLogo';
-import { Role } from '../../types/types';
+import { Role } from '../../types';
 import { supabaseService } from '../../services/supabaseService';
 import { UploadIcon } from '../../shared/Icons';
 

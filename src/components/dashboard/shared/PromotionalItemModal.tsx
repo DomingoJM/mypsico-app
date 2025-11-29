@@ -2,7 +2,7 @@ import React, { useState, ChangeEvent, useContext, useRef } from 'react';
 import * as supabaseService from '../../../services/supabaseService';
 import { AuthContext } from '../../../App';
 import { CloseIcon, PhotoIcon, UploadIcon } from '../../../shared/Icons';
-import { PromotionalItem, PromotionalItemType } from '../../../types/types';
+import { PromotionalItem, PromotionalItemType } from '../../../types';
 
 interface PromotionalItemModalProps {
     item: PromotionalItem | null;

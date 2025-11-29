@@ -2,7 +2,7 @@ import React, { useState, ChangeEvent, useContext } from 'react';
 import * as supabaseService from '../../../services/supabaseService';
 import { AuthContext } from '../../../App';
 import { CloseIcon } from '../../../shared/Icons';
-import { ContentItem, ContentType } from '../../../types/types';
+import { ContentItem, ContentType } from '../../../types';
 
 interface ContentUploadModalProps {
     onClose: () => void;
