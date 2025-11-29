@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import UserManagement from '../shared/UserManagement';
 import ContentManagement from '../shared/ContentManagement';
-import { Role, User } from '../../../types/types';
+import { Role, User } from "../../../types"
 import PatientDetailView from './PatientDetailView';
 import PromotionalItemsManagement from '../shared/PromotionalItemsManagement';
 

@@ -1,8 +1,6 @@
-
-
 import React, { useContext } from 'react';
 import { AuthContext } from '../../App';
-import { Role } from '../../types/types';
+import { Role } from '../../types'; // ✅ CAMBIADO
 import AdminDashboard from './admin/AdminDashboard';
 import TherapistDashboard from './therapist/TherapistDashboard';
 import PatientDashboard from './patient/PatientDashboard';
