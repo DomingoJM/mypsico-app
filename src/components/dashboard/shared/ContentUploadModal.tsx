@@ -2,43 +2,53 @@ import React, { useState, ChangeEvent, useContext } from 'react';
 import * as supabaseService from '../../../services/supabaseService';
 import { AuthContext } from '../../../App';
 import { CloseIcon } from '../../../shared/Icons';
-import { ContentItem, ContentType } from '../../../types';
+import { Content, ContentType, ContentStatus } from '../../../types'; // ✅ CAMBIADO
 
 interface ContentUploadModalProps {
     onClose: () => void;
     onSuccess: () => void;
 }
 
-const spiritualPaths = ['Mindfulness', 'Meditación Cristiana', 'Psicoterapia'];
-const pathologies = ['depresion', 'ansiedad', 'estres', 'problemas_pareja', 'adicciones', 'tab', 'fobias', 'crecimiento'];
+const categories = ['Mindfulness', 'Meditación', 'Psicoterapia', 'Desarrollo Personal', 'Espiritualidad'];
 
 const ContentUploadModal: React.FC<ContentUploadModalProps> = ({ onClose, onSuccess }) => {
-    const [formData, setFormData] = useState<Partial<Omit<ContentItem, 'id' | 'authorId'>>>({
-        day: 1,
+    const [formData, setFormData] = useState<Partial<Content>>({ // ✅ CAMBIADO
+        title: '',
+        description: '',
         type: ContentType.Video,
-        content: ''
+        url: '', // ✅ CAMBIADO: content → url
+        thumbnail_url: '',
+        category: '',
+        featured: false,
+        status: ContentStatus.Active
     });
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const auth = useContext(AuthContext);
 
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        const { name, value, type } = e.target;
+        
+        if (type === 'checkbox') {
+            const checked = (e.target as HTMLInputElement).checked;
+            setFormData(prev => ({ ...prev, [name]: checked }));
+        } else {
+            setFormData(prev => ({ ...prev, [name]: value }));
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
 
-        if (!formData.title || !formData.day || !formData.type || !formData.content) {
-            setError("Por favor, completa los campos de título, día, tipo y URL.");
+        if (!formData.title || !formData.type || !formData.url) { // ✅ CAMBIADO
+            setError("Por favor, completa los campos de título, tipo y URL.");
             return;
         }
         
         try {
             // Validar que la URL sea válida
-            new URL(formData.content);
+            new URL(formData.url); // ✅ CAMBIADO
         } catch (_) {
             setError("La URL del contenido no es válida. Por favor, verifica el enlace.");
             return;
@@ -52,18 +62,17 @@ const ContentUploadModal: React.FC<ContentUploadModalProps> = ({ onClose, onSucc
         setUploading(true);
 
         try {
-            await supabaseService.addContent(
-                {
-                    day: Number(formData.day),
-                    title: formData.title,
-                    type: formData.type,
-                    content: formData.content,
-                    thumbnail_url: formData.thumbnail_url || undefined,
-                    spiritual_path: formData.spiritual_path || undefined,
-                    pathology: formData.pathology || undefined,
-                },
-                auth.user.id
-            );
+            await supabaseService.addContent({ // ✅ CAMBIADO
+                title: formData.title!,
+                description: formData.description || '',
+                type: formData.type!,
+                url: formData.url!, // ✅ CAMBIADO
+                thumbnail_url: formData.thumbnail_url || undefined,
+                category: formData.category || 'General',
+                featured: formData.featured || false,
+                status: formData.status || ContentStatus.Active,
+                created_by: auth.user.id // ✅ AGREGADO
+            });
             onSuccess();
         } catch (err: any) {
             console.error(err);
@@ -86,50 +95,116 @@ const ContentUploadModal: React.FC<ContentUploadModalProps> = ({ onClose, onSucc
                     <main className="p-6 space-y-4">
                         <div>
                             <label htmlFor="title" className="block text-sm font-medium text-slate-700">Título</label>
-                            <input type="text" name="title" id="title" onChange={handleChange} required className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary" />
+                            <input 
+                                type="text" 
+                                name="title" 
+                                id="title" 
+                                value={formData.title}
+                                onChange={handleChange} 
+                                required 
+                                className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary" 
+                            />
+                        </div>
+
+                        <div>
+                            <label htmlFor="description" className="block text-sm font-medium text-slate-700">Descripción</label>
+                            <textarea 
+                                name="description" 
+                                id="description" 
+                                value={formData.description}
+                                onChange={handleChange}
+                                rows={3}
+                                className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary" 
+                            />
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label htmlFor="day" className="block text-sm font-medium text-slate-700">Día del Plan</label>
-                                <input type="number" name="day" id="day" value={formData.day} onChange={handleChange} required min="1" className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary" />
+                                <label htmlFor="type" className="block text-sm font-medium text-slate-700">Tipo de Contenido</label>
+                                <select 
+                                    name="type" 
+                                    id="type" 
+                                    value={formData.type} 
+                                    onChange={handleChange} 
+                                    required 
+                                    className="mt-1 block w-full pl-3 pr-10 py-2 border-slate-300 focus:outline-none focus:ring-brand-primary focus:border-brand-primary rounded-md"
+                                >
+                                    {Object.values(ContentType).map(type => (
+                                        <option key={type} value={type} className="capitalize">{type}</option>
+                                    ))}
+                                </select>
                             </div>
                             <div>
-                                <label htmlFor="type" className="block text-sm font-medium text-slate-700">Tipo de Contenido</label>
-                                <select name="type" id="type" value={formData.type} onChange={handleChange} required className="mt-1 block w-full pl-3 pr-10 py-2 border-slate-300 focus:outline-none focus:ring-brand-primary focus:border-brand-primary rounded-md">
-                                    {Object.values(ContentType).map(type => (
-                                        <option key={type} value={type} className="capitalize">{type.replace('_', ' ')}</option>
-                                    ))}
+                                <label htmlFor="category" className="block text-sm font-medium text-slate-700">Categoría</label>
+                                <select 
+                                    name="category" 
+                                    id="category" 
+                                    value={formData.category || ''} 
+                                    onChange={handleChange}
+                                    className="mt-1 block w-full pl-3 pr-10 py-2 border-slate-300 focus:outline-none focus:ring-brand-primary focus:border-brand-primary rounded-md"
+                                >
+                                    <option value="">General</option>
+                                    {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                                 </select>
                             </div>
                         </div>
 
                         <div>
-                            <label htmlFor="content" className="block text-sm font-medium text-slate-700">URL del Contenido</label>
-                            <input type="url" name="content" id="content" onChange={handleChange} required placeholder="https://www.youtube.com/watch?v=..." className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary" />
-                            <p className="mt-1 text-xs text-slate-500">Pega aquí el enlace "No listado" de YouTube o el enlace para "Compartir" de un episodio de Spotify.</p>
+                            <label htmlFor="url" className="block text-sm font-medium text-slate-700">URL del Contenido</label>
+                            <input 
+                                type="url" 
+                                name="url" 
+                                id="url" 
+                                value={formData.url}
+                                onChange={handleChange} 
+                                required 
+                                placeholder="https://www.youtube.com/watch?v=..." 
+                                className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary" 
+                            />
+                            <p className="mt-1 text-xs text-slate-500">Pega aquí el enlace de YouTube, Spotify, o cualquier recurso multimedia.</p>
                         </div>
                         
                         <div>
                             <label htmlFor="thumbnail_url" className="block text-sm font-medium text-slate-700">URL de la Miniatura (Opcional)</label>
-                            <input type="url" name="thumbnail_url" id="thumbnail_url" onChange={handleChange} placeholder="https://ejemplo.com/imagen.jpg" className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary" />
+                            <input 
+                                type="url" 
+                                name="thumbnail_url" 
+                                id="thumbnail_url" 
+                                value={formData.thumbnail_url}
+                                onChange={handleChange} 
+                                placeholder="https://ejemplo.com/imagen.jpg" 
+                                className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary" 
+                            />
                             <p className="mt-1 text-xs text-slate-500">Si es un video de YouTube, se detectará automáticamente si dejas esto en blanco.</p>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                             <div>
-                                <label htmlFor="spiritual_path" className="block text-sm font-medium text-slate-700">Senda Terapéutica (Opcional)</label>
-                                <select name="spiritual_path" id="spiritual_path" value={formData.spiritual_path || ''} onChange={handleChange} className="mt-1 block w-full pl-3 pr-10 py-2 border-slate-300 focus:outline-none focus:ring-brand-primary focus:border-brand-primary rounded-md">
-                                    <option value="">Ninguna</option>
-                                    {spiritualPaths.map(path => <option key={path} value={path}>{path}</option>)}
+                            <div>
+                                <label htmlFor="status" className="block text-sm font-medium text-slate-700">Estado</label>
+                                <select 
+                                    name="status" 
+                                    id="status" 
+                                    value={formData.status || ContentStatus.Active} 
+                                    onChange={handleChange}
+                                    className="mt-1 block w-full pl-3 pr-10 py-2 border-slate-300 focus:outline-none focus:ring-brand-primary focus:border-brand-primary rounded-md"
+                                >
+                                    {Object.values(ContentStatus).map(status => (
+                                        <option key={status} value={status} className="capitalize">{status}</option>
+                                    ))}
                                 </select>
                             </div>
-                             <div>
-                                <label htmlFor="pathology" className="block text-sm font-medium text-slate-700">Patología (Opcional)</label>
-                                <select name="pathology" id="pathology" value={formData.pathology || ''} onChange={handleChange} className="mt-1 block w-full pl-3 pr-10 py-2 border-slate-300 focus:outline-none focus:ring-brand-primary focus:border-brand-primary rounded-md">
-                                    <option value="">Ninguna</option>
-                                    {pathologies.map(p => <option key={p} value={p} className="capitalize">{p.replace('_', ' ')}</option>)}
-                                </select>
+                            <div className="flex items-center pt-6">
+                                <input
+                                    type="checkbox"
+                                    name="featured"
+                                    id="featured"
+                                    checked={formData.featured || false}
+                                    onChange={handleChange}
+                                    className="h-4 w-4 text-brand-primary focus:ring-brand-primary border-gray-300 rounded"
+                                />
+                                <label htmlFor="featured" className="ml-2 block text-sm text-gray-900">
+                                    Destacar este contenido
+                                </label>
                             </div>
                         </div>
 
