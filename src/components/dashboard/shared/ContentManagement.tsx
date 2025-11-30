@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import { ContentItem, ContentType, Role } from '../../../types'; // ✅ Agregado Role
+import { ContentItem, ContentType, UserRole } from '../../../types';
 import * as supabaseService from '../../../services/supabaseService';
 import { AuthContext } from '../../../App';
 import ContentUploadModal from './ContentUploadModal';
@@ -64,7 +64,7 @@ const ContentManagement: React.FC = () => {
         setLoading(true);
         setError(null);
         try {
-            const data = await supabaseService.getContents(); // ✅ Cambiado de getContent() a getContents()
+            const data = await supabaseService.getContents();
             setContent(data);
         } catch (error: unknown) {
             console.error("Failed to load content:", error);
@@ -114,8 +114,7 @@ const ContentManagement: React.FC = () => {
         }
     };
 
-    // ✅ Usa enums en lugar de strings
-    const canManageContent = auth?.originalUser?.role === Role.Admin || auth?.originalUser?.role === Role.Therapist;
+    const canManageContent = auth?.originalUser?.role === UserRole.Admin || auth?.originalUser?.role === UserRole.Therapist;
 
     if (loading) return <div>Cargando contenido...</div>;
 
