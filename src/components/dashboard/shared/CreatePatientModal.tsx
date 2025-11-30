@@ -2,20 +2,12 @@ import React, { useState, useRef, ChangeEvent, useContext } from 'react';
 import * as supabaseService from '../../../services/supabaseService';
 import { AuthContext } from '../../../App';
 import { CloseIcon, PhotoIcon } from '../../../shared/Icons';
-<<<<<<< HEAD
-import { UserRole, User } from '../../../types'; // ✅ AGREGADO User
-=======
 import { User, UserRole } from '../../../types';
->>>>>>> version-estable-nov28
 
 interface CreatePatientModalProps {
     onClose: () => void;
     onSuccess: () => void;
-<<<<<<< HEAD
-    manageableRole: UserRole.Admin | UserRole.Patient; // ✅ CAMBIADO
-=======
     manageableRole: UserRole.Admin | UserRole.Patient;
->>>>>>> version-estable-nov28
 }
 
 const spiritualPaths = [
@@ -31,10 +23,6 @@ const spiritualPaths = [
     "Otra"
 ];
 
-<<<<<<< HEAD
-// Helper components
-=======
->>>>>>> version-estable-nov28
 const FormInput: React.FC<{ 
     name: string, 
     label: string, 
@@ -81,11 +69,7 @@ const FormTextarea: React.FC<{
 
 const CreatePatientModal: React.FC<CreatePatientModalProps> = ({ onClose, onSuccess, manageableRole }) => {
     const [formData, setFormData] = useState<Partial<User & { password?: string; photoFile?: File }>>({
-<<<<<<< HEAD
-        role: manageableRole === UserRole.Patient ? UserRole.Patient : UserRole.Patient, // ✅ CAMBIADO
-=======
         role: manageableRole === UserRole.Patient ? UserRole.Patient : UserRole.Patient,
->>>>>>> version-estable-nov28
     });
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
@@ -93,11 +77,7 @@ const CreatePatientModal: React.FC<CreatePatientModalProps> = ({ onClose, onSucc
     const fileInputRef = useRef<HTMLInputElement>(null);
     const auth = useContext(AuthContext);
 
-<<<<<<< HEAD
-    const isTherapistView = manageableRole === UserRole.Patient; // ✅ CAMBIADO
-=======
     const isTherapistView = manageableRole === UserRole.Patient;
->>>>>>> version-estable-nov28
 
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -128,10 +108,6 @@ const CreatePatientModal: React.FC<CreatePatientModalProps> = ({ onClose, onSucc
         }
 
         try {
-<<<<<<< HEAD
-            // ✅ CORREGIDO: createUser solo recibe 3 parámetros
-=======
->>>>>>> version-estable-nov28
             const result = await supabaseService.createUser(
                 formData.email,
                 formData.password,
@@ -142,10 +118,6 @@ const CreatePatientModal: React.FC<CreatePatientModalProps> = ({ onClose, onSucc
                 throw new Error(result.error);
             }
 
-<<<<<<< HEAD
-            // ✅ Si hay foto, subirla
-=======
->>>>>>> version-estable-nov28
             if (formData.photoFile && result.user) {
                 try {
                     const photoUrl = await supabaseService.uploadFile(
@@ -159,10 +131,6 @@ const CreatePatientModal: React.FC<CreatePatientModalProps> = ({ onClose, onSucc
                 }
             }
 
-<<<<<<< HEAD
-            // ✅ Actualizar perfil con datos adicionales
-=======
->>>>>>> version-estable-nov28
             if (result.user) {
                 const updates: any = {
                     role: isTherapistView ? UserRole.Patient : formData.role,
@@ -191,11 +159,8 @@ const CreatePatientModal: React.FC<CreatePatientModalProps> = ({ onClose, onSucc
                     errorMessage = "La contraseña debe tener al menos 6 caracteres.";
                 } else if (message.includes('email')) {
                     errorMessage = "El formato del correo electrónico no es válido.";
-<<<<<<< HEAD
-=======
                 } else if (message.includes('bucket not found')) {
                     errorMessage = "Error: El bucket 'user-assets' no existe. Créalo en Supabase.";
->>>>>>> version-estable-nov28
                 } else {
                     errorMessage = err.message;
                 }
@@ -220,10 +185,6 @@ const CreatePatientModal: React.FC<CreatePatientModalProps> = ({ onClose, onSucc
                 <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
                     <main className="p-6 space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-<<<<<<< HEAD
-                            {/* Photo Upload */}
-=======
->>>>>>> version-estable-nov28
                             <div className="md:col-span-1 flex flex-col items-center">
                                 <input
                                     type="file"
@@ -271,10 +232,6 @@ const CreatePatientModal: React.FC<CreatePatientModalProps> = ({ onClose, onSucc
                             </div>
                         </div>
 
-<<<<<<< HEAD
-                        {/* Additional Info */}
-=======
->>>>>>> version-estable-nov28
                         <div className="space-y-4">
                             <h3 className="text-lg font-semibold text-brand-dark border-b pb-2">Información Adicional</h3>
                             <div>
